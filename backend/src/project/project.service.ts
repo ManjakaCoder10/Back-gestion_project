@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable ,NotFoundException  } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Project } from '../entities/project.entity';
@@ -38,6 +38,42 @@ export class ProjectService {
 
     return savedProject;
   }
+
+   
+  async deleteProject(id: number): Promise<void> {
+  
+    const project = await this.projectRepository.findOne({
+      where: {project_id : id },
+      relations: ['tasks'],
+    });
+
+    if (!project) {
+      throw new NotFoundException(`project avec l'ID ${id} introuvable`);
+    }
+
+ 
+    await this.taskRepository.delete({ project });
+
+
+    const result = await this.projectRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Utilisateur avec l'ID ${id} introuvable`);
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
   async tableProject(): Promise<Project[]> {
     const Project = await this.projectRepository.createQueryBuilder('Project')
       .getMany(); 

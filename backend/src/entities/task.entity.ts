@@ -21,9 +21,9 @@ export class Task {
   @Column({ nullable: true })
   deadline: Date;
 
-  @ManyToOne(() => User, (user) => user.tasks)
+  @ManyToOne(() => User, (user) => user.tasks  ,{ onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Project, (project) => project.tasks)
+  @ManyToOne(() => Project, (project) => project.tasks ,{ onDelete: 'CASCADE' })
   project: Project;
 }

@@ -1,4 +1,4 @@
-import { Controller, Post,Get, Body } from '@nestjs/common';
+import { Controller, Get, Post,Body,Param, ParseIntPipe, Delete,Query } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './create-project.dto';
 import { Project } from '../entities/project.entity';
@@ -18,6 +18,11 @@ export class ProjectController {
   ): Promise<Project[]> {
     
     return this.projectService.tableProject();
+  }
+
+  @Delete(':id')
+  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    await this.projectService.deleteProject(id);
   }
 
 

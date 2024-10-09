@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 
 export default function GestionProjet() {
   const [nomProjet, setNomProjet] = useState('');
+  const [id,  setProjectId] = useState(null);
   const [Project, setProject] = useState([]);
   const [description, setDescription] = useState('');
   const [dateDebut, setDateDebut] = useState('');
@@ -40,7 +41,7 @@ export default function GestionProjet() {
   useEffect(() => {
     fetchAvailableUsers();
   }, []);
-  useEffect(() => {
+  
     const fetchProject = async () => {
       try {
         const response = await fetch('http://localhost:3001/projet/liste/table_project');
@@ -53,7 +54,7 @@ export default function GestionProjet() {
         console.error('Erreur:', error);
       }
     };
-
+    useEffect(() => {
     fetchProject();
   }, []);
 
@@ -61,6 +62,7 @@ export default function GestionProjet() {
     e.preventDefault();
 
     const projetData = {
+      id,
       nomProjet,
       description,
       dateDebut,
@@ -97,6 +99,7 @@ export default function GestionProjet() {
         setIDDesigner('');
         setIDConcepteur('');
         setIDdevs('');
+        setProjectId(null);
 
       } else {
         setMessage('Erreur lors de l\'ajout du projet et des tâches');
@@ -106,6 +109,40 @@ export default function GestionProjet() {
       setMessage('Erreur lors de l\'envoi des données');
     }
   };
+
+  const handleDelete = async (project_id) => {
+    try {
+      const response = await fetch(`http://localhost:3001/projet/${project_id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setMessage('Utilisateur supprimé avec succès');
+        fetchProject();
+      } else {
+        setMessage('Erreur lors de la suppression de l\'utilisateur');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la suppression de l\'utilisateur:', error);
+      setMessage('Erreur lors de la suppression de l\'utilisateur');
+    }
+  };
+
+ 
+  const modifier = (project) => {
+    
+        setNomProjet(project.project_name);
+        setDescription(project.description);
+        setDateDebut(project.start_date);
+        setDateFin(project. end_date);
+        setProjectId(project.project_id);
+
+
+  };
+
+
+
+
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -274,6 +311,7 @@ export default function GestionProjet() {
                   <th className="border px-4 py-2 text-left">description</th>
                   <th className="border px-4 py-2 text-left">start_date</th>
                   <th className="border px-4 py-2 text-left">end_date</th>
+                  <th className="border px-4 py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -290,6 +328,20 @@ export default function GestionProjet() {
                       <td className="border px-4 py-2">{project.description}</td>
                       <td className="border px-4 py-2">{project.start_date}</td>
                       <td className="border px-4 py-2">{project.end_date}</td>
+                      <td className="border px-4 py-2 text-center">
+                 <button
+                      onClick={() => modifier(project)}
+                      className="bg-yellow-500 text-white py-1 px-2 rounded mr-2 hover:bg-yellow-600"
+                    >
+                      Modifier
+                    </button>  
+                    <button 
+                      onClick={() => handleDelete(project.project_id)}
+                      className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600"
+                    >
+                      Supprimer
+                    </button>
+                  </td>
                     </tr>
                   ))
                 )}

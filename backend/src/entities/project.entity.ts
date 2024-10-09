@@ -18,6 +18,6 @@ export class Project {
   @Column({ nullable: true })
   end_date: Date;
 
-  @OneToMany(() => Task, (task) => task.project)
+  @OneToMany(() => Task, (task) => task.project ,{ cascade: true })
   tasks: Task[];
 }

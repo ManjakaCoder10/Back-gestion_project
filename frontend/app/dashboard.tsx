@@ -1,18 +1,14 @@
-// src/components/Dashboard.js
 "use client";
 import { useState, useEffect } from 'react';
 
-
-import GestionProjet from './gestion_projet'; // Importation du composant GestionProjet
-
-// Enregistrement des éléments de chart.js
-
+import GestionProjet from './gestion_projet'; 
+import GestionUser from './gestion_user'; // Importer le composant de gestion des utilisateurs
 
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
-  const [showGestionProjet, setShowGestionProjet] = useState(false); // État pour afficher ou cacher gestion_projet
+  const [showGestionProjet, setShowGestionProjet] = useState(false); 
+  const [showGestionUser, setShowGestionUser] = useState(false); 
 
-  // Récupérer les utilisateurs dès le chargement du composant
   useEffect(() => {
     const fetchAvailableUsers = async () => {
       try {
@@ -32,48 +28,28 @@ export default function Dashboard() {
 
   // Gérer le clic pour afficher la gestion de projet
   const handleGestionProjetClick = () => {
-    setShowGestionProjet(true); // Afficher le composant GestionProjet et masquer le reste
+    setShowGestionProjet(true); 
+    setShowGestionUser(false); // Masquer la gestion des utilisateurs
+  };
+
+  // Gérer le clic pour afficher la gestion des utilisateurs
+  const handleGestionUserClick = () => {
+    setShowGestionUser(true); 
+    setShowGestionProjet(false); // Masquer la gestion des projets
   };
 
   // Gérer le retour au tableau de bord
   const handleBackToDashboardClick = () => {
-    setShowGestionProjet(false); // Réafficher le tableau de bord et masquer la gestion de projet
-  };
-
-  // Données pour le graphique de l'évolution du projet (exemple de graphique en ligne)
-  const projectProgressData = {
-    labels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'],
-    datasets: [
-      {
-        label: 'Projets terminés',
-        data: [5, 10, 6, 8, 15, 12],
-        borderColor: 'rgba(75, 192, 192, 1)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderWidth: 2,
-      },
-    ],
-  };
-
-  // Données pour le graphique de l'évolution des tâches (exemple de graphique en barres)
-  const taskProgressData = {
-    labels: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'],
-    datasets: [
-      {
-        label: 'Tâches complétées',
-        data: [50, 75, 60, 90, 120, 100],
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 2,
-      },
-    ],
+    setShowGestionProjet(false); 
+    setShowGestionUser(false); // Réafficher le tableau de bord
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center text-blue-600">Tableau de bord</h1>
 
-      {/* Si showGestionProjet est false, on affiche les panneaux et le tableau des utilisateurs */}
-      {!showGestionProjet ? (
+      {/* Si showGestionProjet et showGestionUser sont false, on affiche le tableau de bord */}
+      {!showGestionProjet && !showGestionUser ? (
         <>
           <div className="grid grid-cols-2 gap-6">
             {/* Panel d'ajout de projet */}
@@ -87,7 +63,7 @@ export default function Dashboard() {
 
             {/* Panel de gestion des utilisateurs */}
             <div
-              onClick={() => alert("Interface de gestion des utilisateurs - fonctionnalité à venir")}
+              onClick={handleGestionUserClick}
               className="bg-purple-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:bg-purple-600 transition duration-300"
             >
               <h2 className="text-2xl font-bold">Gérer les utilisateurs</h2>
@@ -95,7 +71,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-     
+          {/* Tableau des utilisateurs */}
           <div className="bg-white p-6 rounded-lg shadow-md mt-6">
             <h2 className="text-2xl font-bold mb-4 text-blue-500">Utilisateurs disponibles</h2>
 
@@ -128,9 +104,8 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
-
-          {/* Statistiques - évolution du projet et des tâches côte à côte */}
-          <div className="grid grid-cols-2 gap-6 mt-6">
+             {/* Statistiques - évolution du projet et des tâches côte à côte */}
+             <div className="grid grid-cols-2 gap-6 mt-6">
             {/* Statistiques - évolution du projet */}
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4 text-blue-500">Évolution du projet</h2>
@@ -150,9 +125,8 @@ export default function Dashboard() {
             </div>
           </div>
         </>
-      ) : (
+      ) : showGestionProjet ? (
         <>
-  
           <GestionProjet />
           <button
             onClick={handleBackToDashboardClick}
@@ -161,7 +135,17 @@ export default function Dashboard() {
             Retour au tableau de bord
           </button>
         </>
-      )}
+      ) : showGestionUser ? (
+        <>
+          <GestionUser />
+          <button
+            onClick={handleBackToDashboardClick}
+            className="mt-4 bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600 transition duration-300"
+          >
+            Retour au tableau de bord
+          </button>
+        </>
+      ) : null}
     </div>
   );
 }
