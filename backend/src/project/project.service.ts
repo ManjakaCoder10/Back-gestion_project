@@ -15,29 +15,44 @@ export class ProjectService {
   ) {}
 
   async createProject(createProjectDto: CreateProjectDto): Promise<Project> {
-    const project = new Project();
-    project.  project_name = createProjectDto.nomProjet;
+    let project: Project;
+  
+    // Vérification de l'existence du projet par ID ou autre critère
+    if (createProjectDto.id) {
+      project = await this.projectRepository.findOne({ where: { project_id: createProjectDto.id } });
+      if (!project) {
+        throw new Error(`Le projet avec l'ID ${createProjectDto.id} n'existe pas`);
+      }
+    } else {
+      // Créer un nouveau projet si aucun ID n'est fourni
+      project = new Project();
+    }
+  
+    // Mise à jour des champs du projet
+    project.project_name = createProjectDto.nomProjet;
     project.description = createProjectDto.description;
     project.start_date = createProjectDto.dateDebut;
-    project. end_date = createProjectDto.dateFin;
-
+    project.end_date = createProjectDto.dateFin;
+  
+    // Sauvegarder le projet
     const savedProject = await this.projectRepository.save(project);
-
+  
+    // Gestion des tâches
     for (const tache of createProjectDto.taches) {
       const task = new Task();
-      task. task_name = tache.nom;
-    
-  
+      task.task_name = tache.nom;
       task.deadline = tache.deadline;
-      task.userUserId=tache.id;
+      task.userUserId = tache.id;
       task.description = tache.description;
-   
       task.project = savedProject;
+  
+      // Sauvegarder chaque tâche
       await this.taskRepository.save(task);
     }
-
+  
     return savedProject;
   }
+  
 
    
   async deleteProject(id: number): Promise<void> {
@@ -75,9 +90,13 @@ export class ProjectService {
 
 
   async tableProject(): Promise<Project[]> {
-    const Project = await this.projectRepository.createQueryBuilder('Project')
-      .getMany(); 
+    const projects = await this.projectRepository.createQueryBuilder('Project')
+        .leftJoinAndSelect('Project.tasks', 'Task')   // Joindre les tâches associées aux projets
+        .leftJoinAndSelect('Task.user', 'User')       // Joindre les utilisateurs associés aux tâches
+        .getMany();
 
-    return Project;
+    return projects;
 }
+
+
 }

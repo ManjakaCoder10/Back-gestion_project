@@ -130,15 +130,28 @@ export default function GestionProjet() {
 
  
   const modifier = (project) => {
-    
-        setNomProjet(project.project_name);
-        setDescription(project.description);
-        setDateDebut(project.start_date);
-        setDateFin(project. end_date);
-        setProjectId(project.project_id);
-
-
+    setNomProjet(project.project_name);
+    setDescription(project.description);
+    setDateDebut(project.start_date);
+    setDateFin(project.end_date);
+    setProjectId(project.project_id);
+  
+    // Récupérer les tâches du projet (dev, concepteur, designer)
+    const devTask = project.tasks.find(task => task.task_name === 'développeur');
+    const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
+    const designerTask = project.tasks.find(task => task.task_name === 'designer');
+  
+    // Vérifier si la tâche existe avant de définir l'ID et la deadline
+    setIDdevs(devTask ? devTask.user_id : '');
+    setDeadlineDev(devTask ? devTask.deadline : '');
+  
+    setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
+    setDeadlineConcepteur(concepteurTask ? concepteurTask.deadline : '');
+  
+    setIDDesigner(designerTask ? designerTask.user_id : '');
+    setDeadlineDesigner(designerTask ? designerTask.deadline : '');
   };
+  
 
 
 
@@ -174,7 +187,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Date de début :</label>
           <input
-            type="date"
+            type="datetime"
             value={dateDebut}
             onChange={(e) => setDateDebut(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -185,7 +198,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Date de fin :</label>
           <input
-            type="date"
+            type="datetime"
             value={dateFin}
             onChange={(e) => setDateFin(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -198,7 +211,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Développeur :</label>
           <input
-            type="date"
+            type="datetime"
             value={deadlineDev}
             onChange={(e) => setDeadlineDev(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -230,7 +243,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Concepteur :</label>
           <input
-            type="date"
+            type="datetime"
             value={deadlineConcepteur}
             onChange={(e) => setDeadlineConcepteur(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -262,7 +275,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Designer :</label>
           <input
-            type="date"
+            type="datetime"
             value={deadlineDesigner}
             onChange={(e) => setDeadlineDesigner(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -302,52 +315,63 @@ export default function GestionProjet() {
 
 
       <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-            <h2 className="text-2xl font-bold mb-4 text-blue-500">Project</h2>
+  <h2 className="text-2xl font-bold mb-4 text-blue-500">Project</h2>
 
-            <table className="min-w-full bg-white border-collapse">
-              <thead>
-                <tr>
-                  <th className="border px-4 py-2 text-left">project_name</th>
-                  <th className="border px-4 py-2 text-left">description</th>
-                  <th className="border px-4 py-2 text-left">start_date</th>
-                  <th className="border px-4 py-2 text-left">end_date</th>
-                  <th className="border px-4 py-2">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Project.length === 0 ? (
-                  <tr>
-                    <td className="border px-4 py-2 text-center">
-                      Aucun utilisateur disponible ce mois-ci
-                    </td>
-                  </tr>
-                ) : (
-                  Project.map((project) => (
-                    <tr key={project.project_id} className="border-t">
-                      <td className="border px-4 py-2">{project.project_name}</td>
-                      <td className="border px-4 py-2">{project.description}</td>
-                      <td className="border px-4 py-2">{project.start_date}</td>
-                      <td className="border px-4 py-2">{project.end_date}</td>
-                      <td className="border px-4 py-2 text-center">
-                 <button
-                      onClick={() => modifier(project)}
-                      className="bg-yellow-500 text-white py-1 px-2 rounded mr-2 hover:bg-yellow-600"
-                    >
-                      Modifier
-                    </button>  
-                    <button 
-                      onClick={() => handleDelete(project.project_id)}
-                      className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600"
-                    >
-                      Supprimer
-                    </button>
-                  </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+  <table className="min-w-full bg-white border-collapse">
+    <thead>
+      <tr>
+        <th className="border px-4 py-2 text-left">Nom du projet</th>
+        <th className="border px-4 py-2 text-left">Description</th>
+        <th className="border px-4 py-2 text-left">Date de début</th>
+        <th className="border px-4 py-2 text-left">Date de fin</th>
+        <th className="border px-4 py-2 text-left">Tâches</th>
+        <th className="border px-4 py-2">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {Project.length === 0 ? (
+        <tr>
+          <td className="border px-4 py-2 text-center" colSpan={6}>
+            Aucun projet disponible ce mois-ci
+          </td>
+        </tr>
+      ) : (
+        Project.map((project) => (
+          <tr key={project.project_id} className="border-t">
+            <td className="border px-4 py-2">{project.project_name}</td>
+            <td className="border px-4 py-2">{project.description}</td>
+            <td className="border px-4 py-2">{project.start_date}</td>
+            <td className="border px-4 py-2">{project.end_date}</td>
+            <td className="border px-4 py-2">
+              <ul>
+                {project.tasks.map((task) => (
+                  <li key={task.task_id}>
+                    {task.task_name} - Assigné à : {task.user ? task.user.name : 'Non assigné'}
+                  </li>
+                ))}
+              </ul>
+            </td>
+            <td className="border px-4 py-2 text-center">
+              <button
+                onClick={() => modifier(project)}
+                className="bg-yellow-500 text-white py-1 px-2 rounded mr-2 hover:bg-yellow-600"
+              >
+                Modifier
+              </button>
+              <button
+                onClick={() => handleDelete(project.project_id)}
+                className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600"
+              >
+                Supprimer
+              </button>
+            </td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
+
     </div>
   );
 }
