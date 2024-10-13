@@ -27,7 +27,7 @@ export default function GestionProjet() {
   
   const [message, setMessage] = useState('');
 
-  // Fonction pour récupérer les utilisateurs disponibles
+
   const fetchAvailableUsers = async () => {
     try {
       const response = await fetch('http://localhost:3001/users/available/project');
@@ -85,7 +85,7 @@ export default function GestionProjet() {
 
       if (response.ok) {
         setMessage('Projet et tâches ajoutés avec succès');
-        // Réinitialiser les champs
+  
         setNomProjet('');
         setDescription('');
         setDateDebut('');
@@ -100,6 +100,7 @@ export default function GestionProjet() {
         setIDConcepteur('');
         setIDdevs('');
         setProjectId(null);
+        fetchProject();
 
       } else {
         setMessage('Erreur lors de l\'ajout du projet et des tâches');
@@ -129,19 +130,49 @@ export default function GestionProjet() {
   };
 
  
-  const modifier = (project) => {
+  /*const modifier = (project) => {
+    const formatDateTimeLocal = (dateString) => {
+      const date = new Date(dateString);
+      return date.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
+    };
+  
+    // Mise à jour des informations du projet
+    setNomProjet(project.project_name);
+    setDescription(project.description);
+    setDateDebut(formatDateTimeLocal(project.start_date));
+    setDateFin(formatDateTimeLocal(project.end_date));
+    setProjectId(project.project_id);
+  
+    const devTask = project.tasks.find(task => task.task_name === 'développeur');
+    const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
+    const designerTask = project.tasks.find(task => task.task_name === 'designer');
+
+
+
+    setIDdevs(devTask ? devTask.user_id : '');
+    setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
+  
+    setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
+    setDeadlineConcepteur(concepteurTask ? formatDateTimeLocal(concepteurTask.deadline ): '');
+  
+    setIDDesigner(designerTask ? designerTask.user_id : '');
+    setDeadlineDesigner(designerTask ? formatDateTimeLocal(designerTask.deadline) : '');
+   
+ 
+  };
+/**/   const modifier = (project) => {
     setNomProjet(project.project_name);
     setDescription(project.description);
     setDateDebut(project.start_date);
     setDateFin(project.end_date);
     setProjectId(project.project_id);
   
-    // Récupérer les tâches du projet (dev, concepteur, designer)
+
     const devTask = project.tasks.find(task => task.task_name === 'développeur');
     const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
     const designerTask = project.tasks.find(task => task.task_name === 'designer');
   
-    // Vérifier si la tâche existe avant de définir l'ID et la deadline
+
     setIDdevs(devTask ? devTask.user_id : '');
     setDeadlineDev(devTask ? devTask.deadline : '');
   
@@ -187,7 +218,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Date de début :</label>
           <input
-            type="datetime"
+            type="datetime-local"
             value={dateDebut}
             onChange={(e) => setDateDebut(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -198,7 +229,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Date de fin :</label>
           <input
-            type="datetime"
+            type="datetime-local"
             value={dateFin}
             onChange={(e) => setDateFin(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -206,12 +237,11 @@ export default function GestionProjet() {
           />
         </div>
 
-        {/* Tâches et responsables */}
-        {/* Tâche Développeur */}
+    
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Développeur :</label>
           <input
-            type="datetime"
+            type="datetime-local"
             value={deadlineDev}
             onChange={(e) => setDeadlineDev(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -243,7 +273,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Concepteur :</label>
           <input
-            type="datetime"
+            type="datetime-local"
             value={deadlineConcepteur}
             onChange={(e) => setDeadlineConcepteur(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -275,7 +305,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Designer :</label>
           <input
-            type="datetime"
+            type="datetime-local"
             value={deadlineDesigner}
             onChange={(e) => setDeadlineDesigner(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
