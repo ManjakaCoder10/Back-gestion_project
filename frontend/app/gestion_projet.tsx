@@ -10,6 +10,11 @@ export default function GestionProjet() {
   const [description, setDescription] = useState('');
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
+
+  const [nomDev, setNomDev] = useState('');
+const [nomConcepteur, setNomConcepteur] = useState('');
+const [nomDesigner, setNomDesigner] = useState('');
+
   
   // États pour les tâches et les utilisateurs
   const [tacheDev, setTacheDev] = useState('développeur');
@@ -90,11 +95,11 @@ export default function GestionProjet() {
         setDescription('');
         setDateDebut('');
         setDateFin('');
-        setTacheDev('');
+  
         setDeadlineDev('');
-        setTacheConcepteur('');
+    
         setDeadlineConcepteur('');
-        setTacheDesigner('');
+
         setDeadlineDesigner('');
         setIDDesigner('');
         setIDConcepteur('');
@@ -160,30 +165,38 @@ export default function GestionProjet() {
    
  
   };
-/**/   const modifier = (project) => {
-    setNomProjet(project.project_name);
-    setDescription(project.description);
-    setDateDebut(project.start_date);
-    setDateFin(project.end_date);
-    setProjectId(project.project_id);
-  
 
-    const devTask = project.tasks.find(task => task.task_name === 'développeur');
-    const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
-    const designerTask = project.tasks.find(task => task.task_name === 'designer');
-  
-
-    setIDdevs(devTask ? devTask.user_id : '');
-    setDeadlineDev(devTask ? devTask.deadline : '');
-  
-    setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
-    setDeadlineConcepteur(concepteurTask ? concepteurTask.deadline : '');
-  
-    setIDDesigner(designerTask ? designerTask.user_id : '');
-    setDeadlineDesigner(designerTask ? designerTask.deadline : '');
+*/
+const modifier = (project) => {
+  const formatDateTimeLocal = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
   };
-  
 
+  // Mise à jour des informations du projet
+  setNomProjet(project.project_name);
+  setDescription(project.description);
+  setDateDebut(formatDateTimeLocal(project.start_date));
+  setDateFin(formatDateTimeLocal(project.end_date));
+  setProjectId(project.project_id);
+
+  const devTask = project.tasks.find(task => task.task_name === 'développeur');
+  const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
+  const designerTask = project.tasks.find(task => task.task_name === 'designer');
+
+  // Remplir automatiquement les select avec les valeurs correspondantes
+  setIDdevs(devTask ? devTask.user_id : '');
+  setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
+  setNomDev(devTask ? devs.find(user => user.user_id === devTask.user_id)?.name : '');
+
+  setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
+  setDeadlineConcepteur(concepteurTask ? formatDateTimeLocal(concepteurTask.deadline) : '');
+  setNomConcepteur(concepteurTask ? devs.find(user => user.user_id === concepteurTask.user_id)?.name : '');
+
+  setIDDesigner(designerTask ? designerTask.user_id : '');
+  setDeadlineDesigner(designerTask ? formatDateTimeLocal(designerTask.deadline) : '');
+  setNomDesigner(designerTask ? devs.find(user => user.user_id === designerTask.user_id)?.name : '');
+};
 
 
 
