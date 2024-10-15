@@ -137,7 +137,7 @@ const [nomDesigner, setNomDesigner] = useState('');
   
  
 
-const modifier = (project) => {
+/*const modifier = (project) => {
   const formatDateTimeLocal = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
@@ -159,8 +159,7 @@ const modifier = (project) => {
 setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
 setNomDev(devTask ? devs.find(user => user.user_id === devTask.user_id)?.name : '');
 
-// Utilisez une chaîne pour l'alerte
-alert(nomDev);  // Au lieu de alert({ nomDev });
+ alert({ nomDev });
 
 
   setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
@@ -170,6 +169,40 @@ alert(nomDev);  // Au lieu de alert({ nomDev });
   setIDDesigner(designerTask ? designerTask.user_id : '');
   setDeadlineDesigner(designerTask ? formatDateTimeLocal(designerTask.deadline) : '');
   setNomDesigner(designerTask ? devs.find(user => user.user_id === designerTask.user_id)?.name : '');
+};
+*/const modifier = (project) => {
+  const formatDateTimeLocal = (dateString) => {
+    const date = new Date(dateString);
+    return date.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
+  };
+
+  setessai(true);
+  setNomProjet(project.project_name);
+  setDescription(project.description);
+  setDateDebut(formatDateTimeLocal(project.start_date));
+  setDateFin(formatDateTimeLocal(project.end_date));
+  setProjectId(project.project_id);
+
+  // Trouver les tâches assignées aux différents rôles
+  const devTask = project.tasks.find(task => task.task_name === 'développeur');
+  const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
+  const designerTask = project.tasks.find(task => task.task_name === 'designer');
+
+  // Développeur
+  setIDdevs(devTask ? devTask.user_id : '');
+  setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
+  setNomDev(devTask ? devs.find(user => user.user_id === devTask. userUserId)?.name || 'Utilisateur inconnu' : '');
+
+  // Concepteur
+  setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
+  setDeadlineConcepteur(concepteurTask ? formatDateTimeLocal(concepteurTask.deadline) : '');
+  setNomConcepteur(concepteurTask ? devs.find(user => user.user_id === concepteurTask.userUserId)?.name || 'Utilisateur inconnu' : '');
+  console.log(devTask.user_id, devs);
+
+  // Designer
+  setIDDesigner(designerTask ? designerTask.user_id : '');
+  setDeadlineDesigner(designerTask ? formatDateTimeLocal(designerTask.deadline) : '');
+  setNomDesigner(designerTask ? devs.find(user => user.user_id === designerTask.userUserId)?.name || 'Utilisateur inconnu' : '');
 };
 
 
@@ -238,23 +271,23 @@ alert(nomDev);  // Au lieu de alert({ nomDev });
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Responsable Développeur :</label>
           <div className="mb-4">
+          <select
+  value={IDdevs}
+  onChange={(e) => setIDdevs(e.target.value)}
+  className="w-full p-2 border rounded text-gray-800"
+>
+  <option value="">{nomDev || "Sélectionner un développeur"}</option>
+  {devs.length === 0 ? (
+    <option value="">aucun</option>
+  ) : (
+    devs.map((user) => (
+      <option key={user.user_id} value={user.user_id}>
+        {user.name}
+      </option>
+    ))
+  )}
+</select>
 
-  <select
-    value={IDdevs}
-
-    className="w-full p-2 border rounded text-gray-800"
-  >
-    <option value="">{nomDev}</option>
-    {devs.length === 0 ? (
-      <option value="">aucun</option>
-    ) : (
-      devs.map((user) => (
-        <option key={user.user_id} value={user.user_id}>
-          {user.name}
-        </option>
-      ))
-    )}
-  </select>
 </div>
 
         </div>
@@ -276,9 +309,9 @@ alert(nomDev);  // Au lieu de alert({ nomDev });
             value={IDConcepteur}
             onChange={(e) => setIDConcepteur(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
-            required
+           
           >
-            <option value="">Sélectionner un concepteur</option>
+       <option value="">{nomConcepteur || "Sélectionner un concepteur"}</option>
             {devs.length === 0 ? (
               <option value="">aucun</option>
             ) : (
@@ -308,9 +341,9 @@ alert(nomDev);  // Au lieu de alert({ nomDev });
             value={IDDesigner}
             onChange={(e) => setIDDesigner(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
-            required
+    
           >
-            <option value="">Sélectionner un designer</option>
+             <option value="">{nomDesigner || "Sélectionner un designer"}</option>
             {devs.length === 0 ? (
               <option value="">aucun</option>
             ) : (
