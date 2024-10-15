@@ -10,7 +10,7 @@ export default function GestionProjet() {
   const [description, setDescription] = useState('');
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
-
+const[essai ,setessai]=useState(false);
   const [nomDev, setNomDev] = useState('');
 const [nomConcepteur, setNomConcepteur] = useState('');
 const [nomDesigner, setNomDesigner] = useState('');
@@ -97,7 +97,7 @@ const [nomDesigner, setNomDesigner] = useState('');
         setDateFin('');
   
         setDeadlineDev('');
-    
+        setessai(false);
         setDeadlineConcepteur('');
 
         setDeadlineDesigner('');
@@ -134,46 +134,16 @@ const [nomDesigner, setNomDesigner] = useState('');
     }
   };
 
+  
  
-  /*const modifier = (project) => {
-    const formatDateTimeLocal = (dateString) => {
-      const date = new Date(dateString);
-      return date.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
-    };
-  
-    // Mise à jour des informations du projet
-    setNomProjet(project.project_name);
-    setDescription(project.description);
-    setDateDebut(formatDateTimeLocal(project.start_date));
-    setDateFin(formatDateTimeLocal(project.end_date));
-    setProjectId(project.project_id);
-  
-    const devTask = project.tasks.find(task => task.task_name === 'développeur');
-    const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
-    const designerTask = project.tasks.find(task => task.task_name === 'designer');
 
-
-
-    setIDdevs(devTask ? devTask.user_id : '');
-    setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
-  
-    setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
-    setDeadlineConcepteur(concepteurTask ? formatDateTimeLocal(concepteurTask.deadline ): '');
-  
-    setIDDesigner(designerTask ? designerTask.user_id : '');
-    setDeadlineDesigner(designerTask ? formatDateTimeLocal(designerTask.deadline) : '');
-   
- 
-  };
-
-*/
 const modifier = (project) => {
   const formatDateTimeLocal = (dateString) => {
     const date = new Date(dateString);
     return date.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
   };
 
-  // Mise à jour des informations du projet
+   setessai(true);
   setNomProjet(project.project_name);
   setDescription(project.description);
   setDateDebut(formatDateTimeLocal(project.start_date));
@@ -184,10 +154,14 @@ const modifier = (project) => {
   const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
   const designerTask = project.tasks.find(task => task.task_name === 'designer');
 
-  // Remplir automatiquement les select avec les valeurs correspondantes
-  setIDdevs(devTask ? devTask.user_id : '');
-  setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
-  setNomDev(devTask ? devs.find(user => user.user_id === devTask.user_id)?.name : '');
+
+ setIDdevs(devTask ? devTask.user_id : '');
+setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
+setNomDev(devTask ? devs.find(user => user.user_id === devTask.user_id)?.name : '');
+
+// Utilisez une chaîne pour l'alerte
+alert(nomDev);  // Au lieu de alert({ nomDev });
+
 
   setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
   setDeadlineConcepteur(concepteurTask ? formatDateTimeLocal(concepteurTask.deadline) : '');
@@ -263,23 +237,26 @@ const modifier = (project) => {
         </div>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Responsable Développeur :</label>
-          <select
-            value={IDdevs}
-            onChange={(e) => setIDdevs(e.target.value)}
-            className="w-full p-2 border rounded text-gray-800"
-            required
-          >
-            <option value="">Sélectionner un développeur</option>
-            {devs.length === 0 ? (
-              <option value="">aucun</option>
-            ) : (
-              devs.map((user) => (
-                <option key={user.user_id} value={user.user_id}>
-                  {user.name}
-                </option>
-              ))
-            )}
-          </select>
+          <div className="mb-4">
+
+  <select
+    value={IDdevs}
+
+    className="w-full p-2 border rounded text-gray-800"
+  >
+    <option value="">{nomDev}</option>
+    {devs.length === 0 ? (
+      <option value="">aucun</option>
+    ) : (
+      devs.map((user) => (
+        <option key={user.user_id} value={user.user_id}>
+          {user.name}
+        </option>
+      ))
+    )}
+  </select>
+</div>
+
         </div>
 
         {/* Tâche Concepteur */}
