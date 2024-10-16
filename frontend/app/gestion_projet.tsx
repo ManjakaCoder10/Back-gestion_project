@@ -16,7 +16,7 @@ const [nomConcepteur, setNomConcepteur] = useState('');
 const [nomDesigner, setNomDesigner] = useState('');
 
   
-  // États pour les tâches et les utilisateurs
+
   const [tacheDev, setTacheDev] = useState('développeur');
   const [deadlineDev, setDeadlineDev] = useState('');
   const [devs, setDevs] = useState([]);
@@ -99,7 +99,10 @@ const [nomDesigner, setNomDesigner] = useState('');
         setDeadlineDev('');
         setessai(false);
         setDeadlineConcepteur('');
-
+        setNomDev('');
+        
+        setNomConcepteur('');
+        setNomDesigner('');
         setDeadlineDesigner('');
         setIDDesigner('');
         setIDConcepteur('');
@@ -136,44 +139,10 @@ const [nomDesigner, setNomDesigner] = useState('');
 
   
  
-
-/*const modifier = (project) => {
+const modifier = (project) => {
   const formatDateTimeLocal = (dateString) => {
     const date = new Date(dateString);
-    return date.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
-  };
-
-   setessai(true);
-  setNomProjet(project.project_name);
-  setDescription(project.description);
-  setDateDebut(formatDateTimeLocal(project.start_date));
-  setDateFin(formatDateTimeLocal(project.end_date));
-  setProjectId(project.project_id);
-
-  const devTask = project.tasks.find(task => task.task_name === 'développeur');
-  const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
-  const designerTask = project.tasks.find(task => task.task_name === 'designer');
-
-
- setIDdevs(devTask ? devTask.user_id : '');
-setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
-setNomDev(devTask ? devs.find(user => user.user_id === devTask.user_id)?.name : '');
-
- alert({ nomDev });
-
-
-  setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
-  setDeadlineConcepteur(concepteurTask ? formatDateTimeLocal(concepteurTask.deadline) : '');
-  setNomConcepteur(concepteurTask ? devs.find(user => user.user_id === concepteurTask.user_id)?.name : '');
-
-  setIDDesigner(designerTask ? designerTask.user_id : '');
-  setDeadlineDesigner(designerTask ? formatDateTimeLocal(designerTask.deadline) : '');
-  setNomDesigner(designerTask ? devs.find(user => user.user_id === designerTask.user_id)?.name : '');
-};
-*/const modifier = (project) => {
-  const formatDateTimeLocal = (dateString) => {
-    const date = new Date(dateString);
-    return date.toISOString().slice(0, 16); // Format YYYY-MM-DDTHH:MM
+    return date.toISOString().slice(0, 16); 
   };
 
   setessai(true);
@@ -183,7 +152,7 @@ setNomDev(devTask ? devs.find(user => user.user_id === devTask.user_id)?.name : 
   setDateFin(formatDateTimeLocal(project.end_date));
   setProjectId(project.project_id);
 
-  // Trouver les tâches assignées aux différents rôles
+
   const devTask = project.tasks.find(task => task.task_name === 'développeur');
   const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
   const designerTask = project.tasks.find(task => task.task_name === 'designer');

@@ -2,12 +2,53 @@
 import { useState, useEffect } from 'react';
 
 import GestionProjet from './gestion_projet'; 
-import GestionUser from './gestion_user'; // Importer le composant de gestion des utilisateurs
+import GestionUser from './gestion_user'; 
+import UserPieChart from './PieChart';
+import TaskEvolutionChart from './TaskEvolutionChart';
 
 export default function Dashboard() {
+  const [completedTasks, setCompletedTasks] = useState<number[]>(Array(30).fill(0));
+  const [pendingTasks, setPendingTasks] = useState<number[]>(Array(30).fill(0));
+
   const [users, setUsers] = useState([]);
   const [showGestionProjet, setShowGestionProjet] = useState(false); 
   const [showGestionUser, setShowGestionUser] = useState(false); 
+  const [devsChart, setDevsChart] = useState([]);
+
+
+
+  useEffect(() => {
+    const fetchTaskData = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/tasks/graphe'); 
+        const tasks = await response.json();
+
+        const completed: number[] = Array(30).fill(0);
+        const pending: number[] = Array(30).fill(0);
+        const today = new Date();
+
+        tasks.forEach((task: { deadline: string }) => {
+          const taskDeadline = new Date(task.deadline);
+          const taskDay = taskDeadline.getDate() - 1; 
+
+          if (taskDeadline < today) {
+            completed[taskDay] += 1;
+          } else {
+            pending[taskDay] += 1;
+          }
+        });
+
+        setCompletedTasks(completed);
+        setPendingTasks(pending);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données des tâches:', error);
+      }
+    };
+
+    fetchTaskData();
+  }, []);
+
+
 
   useEffect(() => {
     const fetchAvailableUsers = async () => {
@@ -26,33 +67,47 @@ export default function Dashboard() {
     fetchAvailableUsers();
   }, []);
 
-  // Gérer le clic pour afficher la gestion de projet
+
   const handleGestionProjetClick = () => {
     setShowGestionProjet(true); 
-    setShowGestionUser(false); // Masquer la gestion des utilisateurs
+    setShowGestionUser(false); 
   };
 
-  // Gérer le clic pour afficher la gestion des utilisateurs
+
   const handleGestionUserClick = () => {
     setShowGestionUser(true); 
-    setShowGestionProjet(false); // Masquer la gestion des projets
+    setShowGestionProjet(false); 
   };
 
-  // Gérer le retour au tableau de bord
+ 
   const handleBackToDashboardClick = () => {
     setShowGestionProjet(false); 
-    setShowGestionUser(false); // Réafficher le tableau de bord
+    setShowGestionUser(false); 
   };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/users/available/project');
+      const data = await response.json();
+      setDevsChart(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des utilisateurs disponibles:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center text-blue-600">Tableau de bord</h1>
 
-      {/* Si showGestionProjet et showGestionUser sont false, on affiche le tableau de bord */}
+
       {!showGestionProjet && !showGestionUser ? (
         <>
           <div className="grid grid-cols-2 gap-6">
-            {/* Panel d'ajout de projet */}
+        
             <div
               onClick={handleGestionProjetClick}
               className="bg-blue-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:bg-blue-600 transition duration-300"
@@ -61,7 +116,7 @@ export default function Dashboard() {
               <p className="mt-2">Cliquez ici pour ajouter un nouveau projet.</p>
             </div>
 
-            {/* Panel de gestion des utilisateurs */}
+        
             <div
               onClick={handleGestionUserClick}
               className="bg-purple-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:bg-purple-600 transition duration-300"
@@ -71,7 +126,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Tableau des utilisateurs */}
           <div className="bg-white p-6 rounded-lg shadow-md mt-6">
             <h2 className="text-2xl font-bold mb-4 text-blue-500">Utilisateurs disponibles</h2>
 
@@ -104,23 +158,30 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
-             {/* Statistiques - évolution du projet et des tâches côte à côte */}
+       
              <div className="grid grid-cols-2 gap-6 mt-6">
-            {/* Statistiques - évolution du projet */}
+
             <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold mb-4 text-blue-500">Évolution du projet</h2>
+              <h2 className="text-2xl font-bold mb-4 text-blue-500">Graphique des utilisateurs</h2>
+              {devsChart.length === 0 ? (
+              <p>Aucun utilisateur</p>
+            ) : (
+              <UserPieChart users={devsChart} /> 
+            )}
+
               <div className="flex justify-center">
-                {/* Graphique de l'évolution du projet */}
+             
               
               </div>
             </div>
 
-            {/* Statistiques - évolution des tâches */}
+         
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4 text-blue-500">Évolution des tâches</h2>
+              <TaskEvolutionChart completedTasks={completedTasks} pendingTasks={pendingTasks} />
+
               <div className="flex justify-center">
-                {/* Graphique de l'évolution des tâches */}
-             
+      
               </div>
             </div>
           </div>
@@ -137,6 +198,7 @@ export default function Dashboard() {
         </>
       ) : showGestionUser ? (
         <>
+        
           <GestionUser />
           <button
             onClick={handleBackToDashboardClick}

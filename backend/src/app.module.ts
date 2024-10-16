@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { TaskModule } from './task/task.module';
 import { ProjectModule } from './project/project.module'; // Ajoutez ce module pour les projets
 
 @Module({
@@ -17,7 +18,7 @@ import { ProjectModule } from './project/project.module'; // Ajoutez ce module p
       synchronize: true, // Ne pas activer en production
     }),
     AuthModule,
-    UserModule,
+    UserModule,TaskModule,
     ProjectModule, // Ajoutez le module des projets
   ],
 })
