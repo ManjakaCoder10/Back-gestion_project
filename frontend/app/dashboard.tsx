@@ -5,11 +5,13 @@ import GestionProjet from './gestion_projet';
 import GestionUser from './gestion_user'; 
 import UserPieChart from './PieChart';
 import TaskEvolutionChart from './TaskEvolutionChart';
+import ProjectEvolutionChart from './ProjectEvolutionChart';
+
 
 export default function Dashboard() {
   const [completedTasks, setCompletedTasks] = useState<number[]>(Array(30).fill(0));
   const [pendingTasks, setPendingTasks] = useState<number[]>(Array(30).fill(0));
-
+  const [Projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [showGestionProjet, setShowGestionProjet] = useState(false); 
   const [showGestionUser, setShowGestionUser] = useState(false); 
@@ -48,6 +50,89 @@ export default function Dashboard() {
     fetchTaskData();
   }, []);
 
+
+
+
+
+  const fetchProject = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/projet/liste/table_project');
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des utilisateurs');
+      }
+      const data = await response.json();
+      setProjects(data);
+    } catch (error) {
+      console.error('Erreur:', error);
+    }
+  };
+  useEffect(() => {
+  fetchProject();
+}, []);
+
+
+
+
+useEffect(() => {
+  const fetchTaskData = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/tasks/graphe'); 
+      const tasks = await response.json();
+
+      const completed: number[] = Array(30).fill(0);
+      const pending: number[] = Array(30).fill(0);
+      const today = new Date();
+
+      tasks.forEach((task: { deadline: string }) => {
+        const taskDeadline = new Date(task.deadline);
+        const taskDay = taskDeadline.getDate() - 1; 
+
+        if (taskDeadline < today) {
+          completed[taskDay] += 1;
+        } else {
+          pending[taskDay] += 1;
+        }
+      });
+
+      setCompletedTasks(completed);
+      setPendingTasks(pending);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données des tâches:', error);
+    }
+  };
+
+  fetchTaskData();
+}, []);
+useEffect(() => {
+  const fetchTaskData = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/tasks/graphe'); 
+      const tasks = await response.json();
+
+      const completed: number[] = Array(30).fill(0);
+      const pending: number[] = Array(30).fill(0);
+      const today = new Date();
+
+      tasks.forEach((task: { deadline: string }) => {
+        const taskDeadline = new Date(task.deadline);
+        const taskDay = taskDeadline.getDate() - 1; 
+
+        if (taskDeadline < today) {
+          completed[taskDay] += 1;
+        } else {
+          pending[taskDay] += 1;
+        }
+      });
+
+      setCompletedTasks(completed);
+      setPendingTasks(pending);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données des tâches:', error);
+    }
+  };
+
+  fetchTaskData();
+}, []);
 
 
   useEffect(() => {
@@ -183,6 +268,11 @@ export default function Dashboard() {
               <div className="flex justify-center">
       
               </div>
+              <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+        <h2 className="text-2xl font-bold mb-4 text-blue-500">Évolution des Projets et des Tâches</h2>
+        <ProjectEvolutionChart projects={Projects} /> {/* Passer les projets ici */}
+      </div>
+
             </div>
           </div>
         </>
