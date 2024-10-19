@@ -6,7 +6,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 interface Task {
     task_name: string;
-    deadline: string; // String au format DATETIME dans la base de données
+    deadline: string; 
 }
 
 interface Project {
@@ -21,12 +21,13 @@ interface ProjectEvolutionChartProps {
 }
 
 const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects }) => {
-    const [chartData, setChartData] = useState<any>({});
+    const [chartData, setChartData] = useState<any>(null);
 
     useEffect(() => {
-        // Vérification si projects est un tableau
-        if (!Array.isArray(projects)) {
-            console.error("projects n'est pas un tableau");
+        // Vérification si projects est un tableau et non vide
+        if (!Array.isArray(projects) || projects.length === 0) {
+            console.error("Aucun projet disponible");
+            setChartData(null);
             return;
         }
 
@@ -44,11 +45,16 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
             categoryPercentage: 0.5,
         }));
 
-        // Définir les données pour le graphique
-        setChartData({
-            labels: projectNames, // Noms des projets
-            datasets,
-        });
+ 
+        if (datasets.length > 0) {
+            setChartData({
+                labels: projectNames,
+                datasets,
+            });
+        } else {
+            console.error("Aucun dataset disponible");
+            setChartData(null);
+        }
     }, [projects]);
 
     const options = {
@@ -78,7 +84,15 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
         },
     };
 
-    return <Bar data={chartData} options={options} />;
+    return (
+        <div>
+            {chartData ? (
+                <Bar data={chartData} options={options} />
+            ) : (
+                <p>Aucune donnée de projet à afficher</p>
+            )}
+        </div>
+    );
 };
 
 export default ProjectEvolutionChart;

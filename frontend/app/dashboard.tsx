@@ -269,9 +269,14 @@ useEffect(() => {
       
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-        <h2 className="text-2xl font-bold mb-4 text-blue-500">Évolution des Projets et des Tâches</h2>
-        <ProjectEvolutionChart projects={Projects} /> {/* Passer les projets ici */}
-      </div>
+    <h2 className="text-2xl font-bold mb-4 text-blue-500">Évolution des Projets et des Tâches</h2>
+    {Projects.length > 0 ? (
+        <ProjectEvolutionChart projects={Projects} />
+    ) : (
+        <p>Aucun projet disponible pour l'affichage du graphique.</p>
+    )}
+</div>
+
 
             </div>
           </div>
