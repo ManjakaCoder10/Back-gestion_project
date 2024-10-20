@@ -1,19 +1,20 @@
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, TimeScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { useEffect, useState } from 'react';
+import 'chartjs-adapter-date-fns'; // Importer l'adaptateur de date
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(CategoryScale, TimeScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface Task {
     task_name: string;
-    deadline: string; 
+    deadline: string; // La deadline doit être au format ISO 8601
 }
 
 interface Project {
     project_id: number;
     project_name: string;
-    end_date: string;
-    Task: Task[];
+    end_date: string; // Date de fin du projet au format ISO 8601
+    Task?: Task[]; // La propriété Task est optionnelle
 }
 
 interface ProjectEvolutionChartProps {
@@ -24,44 +25,49 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
     const [chartData, setChartData] = useState<any>(null);
 
     useEffect(() => {
-        // Vérification si projects est un tableau et non vide
         if (!Array.isArray(projects) || projects.length === 0) {
-            console.error("Aucun projet disponible");
             setChartData(null);
             return;
         }
 
-        // Récupérer les noms des projets
-        const projectNames = projects.map((project) => project.project_name);
+        const datasets = [];
 
-        // Créer les datasets pour les tâches de chaque projet
-        const datasets = projects.map((project) => ({
-            label: `Deadlines du projet ${project.project_name}`,
-            data: Array.isArray(project.Task)
-                ? project.Task.map(task => new Date(task.deadline).getTime()) // Conversion des deadlines en timestamps
-                : [], // Si Task n'est pas un tableau, retourner un tableau vide
-            backgroundColor: 'rgba(75, 192, 192, 0.5)', // Couleur uniforme pour toutes les barres
-            barPercentage: 0.5,
-            categoryPercentage: 0.5,
-        }));
-
- 
-        if (datasets.length > 0) {
-            setChartData({
-                labels: projectNames,
-                datasets,
+        // Obtenir toutes les deadlines
+        projects.forEach((project) => {
+            const deadlines = (project.Task || []).map(task => {
+                const date = new Date(task.deadline);
+                return {
+                    x: date, // Utiliser la date comme x
+                    y: 1, // Valeur pour l'axe y, vous pouvez ajuster cette valeur comme nécessaire
+                };
             });
-        } else {
-            console.error("Aucun dataset disponible");
-            setChartData(null);
-        }
+
+            // Ajouter la date de fin du projet
+            const endDate = new Date(project.end_date);
+            deadlines.push({
+                x: endDate,
+                y: 1,
+            });
+
+            datasets.push({
+                label: `Deadlines du projet ${project.project_name}`,
+                data: deadlines,
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                barPercentage: 0.5,
+                categoryPercentage: 0.5,
+            });
+        });
+
+        setChartData({
+            datasets,
+        });
     }, [projects]);
 
     const options = {
         responsive: true,
         plugins: {
             legend: {
-                position: 'top' as const,
+                position: 'top',
             },
             title: {
                 display: true,
@@ -70,16 +76,17 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
         },
         scales: {
             x: {
-                type: 'category',
-            },
-            y: {
-                beginAtZero: false, // Les timestamps ne commencent pas à 0
-                ticks: {
-                    callback: function (value) {
-                        const date = new Date(value as number); // Transformer le timestamp en date
-                        return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`; // Afficher la date et l'heure
+                type: 'time',
+                time: {
+                    unit: 'day', // Unité à afficher
+                    tooltipFormat: 'MMM dd, yyyy', // Format de l'info-bulle
+                    displayFormats: {
+                        day: 'MMM dd', // Format de l'affichage
                     },
                 },
+            },
+            y: {
+                beginAtZero: true,
             },
         },
     };
