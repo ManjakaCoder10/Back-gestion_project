@@ -1,20 +1,35 @@
-import { Chart as ChartJS, CategoryScale, TimeScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    TimeScale,
+    LinearScale,
+    BarElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+} from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { useEffect, useState } from 'react';
-import 'chartjs-adapter-date-fns'; // Importer l'adaptateur de date
+import 'chartjs-adapter-date-fns';
 
-ChartJS.register(CategoryScale, TimeScale, LinearScale, BarElement, Title, Tooltip, Legend);
+// Enregistrement des composants de Chart.js
+ChartJS.register(CategoryScale, TimeScale, LinearScale, BarElement, LineElement, Title, Tooltip, Legend);
 
+// Interfaces pour les tâches et les projets
 interface Task {
     task_name: string;
-    deadline: string; // La deadline doit être au format ISO 8601
+    deadline: string;
 }
+
+const normalizeTaskName = (name: string) => name.trim().toLowerCase();
 
 interface Project {
     project_id: number;
     project_name: string;
-    end_date: string; // Date de fin du projet au format ISO 8601
-    Task?: Task[]; // La propriété Task est optionnelle
+    start_date: string;
+    end_date: string;
+    tasks: Task[];
 }
 
 interface ProjectEvolutionChartProps {
@@ -23,38 +38,62 @@ interface ProjectEvolutionChartProps {
 
 const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects }) => {
     const [chartData, setChartData] = useState<any>(null);
+    const [uniqueTaskNames, setUniqueTaskNames] = useState<string[]>([]);
 
     useEffect(() => {
         if (!Array.isArray(projects) || projects.length === 0) {
             setChartData(null);
+            setUniqueTaskNames([]);
             return;
         }
 
-        const datasets = [];
+        // Extraire les noms de tâches uniques
+        const taskNamesSet = new Set(
+            projects.flatMap(project => project.tasks.map(task => normalizeTaskName(task.task_name)))
+        );
+        const taskNamesArray = Array.from(taskNamesSet);
+        setUniqueTaskNames(taskNamesArray);
 
-        // Obtenir toutes les deadlines
+        const datasets: any[] = [];
+
+        // Ajout des tâches en tant que barres pour chaque projet
         projects.forEach((project) => {
-            const deadlines = (project.Task || []).map(task => {
-                const date = new Date(task.deadline);
-                return {
-                    x: date, // Utiliser la date comme x
-                    y: 1, // Valeur pour l'axe y, vous pouvez ajuster cette valeur comme nécessaire
-                };
-            });
+            const taskData = project.tasks.map((task) => {
+                const normalizedTaskName = normalizeTaskName(task.task_name);
+                const yIndex = taskNamesArray.indexOf(normalizedTaskName); // Utiliser l'index dans uniqueTaskNames
+                return task.deadline && yIndex !== -1 ? {
+                    x: new Date(task.deadline), // La date de la deadline de la tâche
+                    y: yIndex, // Utiliser l'index du nom de la tâche comme position sur l'axe Y
+                } : null;
+            }).filter(Boolean); // Supprimer les valeurs nulles
 
-            // Ajouter la date de fin du projet
-            const endDate = new Date(project.end_date);
-            deadlines.push({
-                x: endDate,
-                y: 1,
-            });
+            if (taskData.length > 0) {
+                datasets.push({
+                    type: 'bar',
+                    label: `Tâches de ${project.project_name}`,
+                    data: taskData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    barThickness: 12,
+                });
+            }
+        });
 
+        // Ajout des projets en tant que lignes (représentant la durée du projet)
+        projects.forEach((project) => {
             datasets.push({
-                label: `Deadlines du projet ${project.project_name}`,
-                data: deadlines,
-                backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                barPercentage: 0.5,
-                categoryPercentage: 0.5,
+                type: 'line',
+                label: `Projet ${project.project_name}`,
+                data: [
+                    { x: new Date(project.start_date), y: -1 }, // Utiliser -1 pour les projets (en dehors des tâches)
+                    { x: new Date(project.end_date), y: -1 },
+                ],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                fill: false,
+                tension: 0.3,
+                pointRadius: 5,
             });
         });
 
@@ -63,7 +102,7 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
         });
     }, [projects]);
 
-    const options = {
+    const options = useMemo(() => ({
         responsive: true,
         plugins: {
             legend: {
@@ -71,25 +110,34 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
             },
             title: {
                 display: true,
-                text: 'Évolution des projets et des tâches (par deadline)',
+                text: 'Évolution des projets et des tâches',
             },
         },
         scales: {
             x: {
                 type: 'time',
                 time: {
-                    unit: 'day', // Unité à afficher
-                    tooltipFormat: 'MMM dd, yyyy', // Format de l'info-bulle
+                    unit: 'day',
+                    tooltipFormat: 'MMM dd, yyyy',
                     displayFormats: {
-                        day: 'MMM dd', // Format de l'affichage
+                        day: 'MMM dd',
                     },
+                },
+                title: {
+                    display: true,
+                    text: 'Dates',
                 },
             },
             y: {
-                beginAtZero: true,
+                type: 'category',
+                labels: ['Projets', ...uniqueTaskNames], // "Projets" comme première catégorie, puis les tâches
+                title: {
+                    display: true,
+                    text: 'Tâches et Projets',
+                },
             },
         },
-    };
+    }), [uniqueTaskNames]);
 
     return (
         <div>
