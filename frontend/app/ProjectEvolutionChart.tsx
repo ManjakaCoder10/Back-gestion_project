@@ -13,16 +13,12 @@ import {
 import { Bar } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
 
-// Enregistrement des composants de Chart.js
 ChartJS.register(CategoryScale, TimeScale, LinearScale, BarElement, LineElement, Title, Tooltip, Legend);
 
-// Interfaces pour les tâches et les projets
 interface Task {
     task_name: string;
     deadline: string;
 }
-
-const normalizeTaskName = (name: string) => name.trim().toLowerCase();
 
 interface Project {
     project_id: number;
@@ -38,68 +34,53 @@ interface ProjectEvolutionChartProps {
 
 const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects }) => {
     const [chartData, setChartData] = useState<any>(null);
-    const [uniqueTaskNames, setUniqueTaskNames] = useState<string[]>([]);
 
     useEffect(() => {
         if (!Array.isArray(projects) || projects.length === 0) {
             setChartData(null);
-            setUniqueTaskNames([]);
             return;
         }
 
-        // Extraire les noms de tâches uniques
-        const taskNamesSet = new Set(
-            projects.flatMap(project => project.tasks.map(task => normalizeTaskName(task.task_name)))
-        );
-        const taskNamesArray = Array.from(taskNamesSet);
-        setUniqueTaskNames(taskNamesArray);
-
         const datasets: any[] = [];
 
-        // Ajout des tâches en tant que barres pour chaque projet
-        projects.forEach((project) => {
-            const taskData = project.tasks.map((task) => {
-                const normalizedTaskName = normalizeTaskName(task.task_name);
-                const yIndex = taskNamesArray.indexOf(normalizedTaskName); // Utiliser l'index dans uniqueTaskNames
-                return task.deadline && yIndex !== -1 ? {
-                    x: new Date(task.deadline), // La date de la deadline de la tâche
-                    y: yIndex, // Utiliser l'index du nom de la tâche comme position sur l'axe Y
-                } : null;
-            }).filter(Boolean); // Supprimer les valeurs nulles
+        projects.forEach((project, projectIndex) => {
+            // Ligne pour la durée du projet
+            const projectLineData = [
+                { x: new Date(project.start_date), y: projectIndex + 1 },
+                { x: new Date(project.end_date), y: projectIndex + 1 }
+            ];
 
-            if (taskData.length > 0) {
-                datasets.push({
-                    type: 'bar',
-                    label: `Tâches de ${project.project_name}`,
-                    data: taskData,
-                    backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    barThickness: 12,
-                });
-            }
-        });
-
-        // Ajout des projets en tant que lignes (représentant la durée du projet)
-        projects.forEach((project) => {
             datasets.push({
                 type: 'line',
-                label: `Projet ${project.project_name}`,
-                data: [
-                    { x: new Date(project.start_date), y: -1 }, // Utiliser -1 pour les projets (en dehors des tâches)
-                    { x: new Date(project.end_date), y: -1 },
-                ],
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                label: `Projet: ${project.project_name}`,
+                data: projectLineData,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.3)',
                 fill: false,
                 tension: 0.3,
                 pointRadius: 5,
+                borderWidth: 2,
+            });
+
+            // Barres pour les tâches du projet avec positionnement unique en y
+            const taskData = project.tasks.map((task, taskIndex) => ({
+                x: new Date(task.deadline),
+                y: projectIndex + 1 + taskIndex * 0.1, // Position légèrement décalée pour éviter le chevauchement
+                task_name: task.task_name
+            }));
+
+            datasets.push({
+                type: 'bar',
+                label: `Tâches de ${project.project_name}`,
+                data: taskData,
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                barThickness: 8,
             });
         });
 
-        setChartData({
-            datasets,
-        });
+        setChartData({ datasets });
     }, [projects]);
 
     const options = useMemo(() => ({
@@ -112,6 +93,14 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
                 display: true,
                 text: 'Évolution des projets et des tâches',
             },
+            tooltip: {
+                callbacks: {
+                    label: function(context: any) {
+                        const taskName = context.raw.task_name;
+                        return taskName ? `Tâche: ${taskName}` : context.dataset.label;
+                    }
+                }
+            }
         },
         scales: {
             x: {
@@ -129,18 +118,25 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
                 },
             },
             y: {
-                type: 'category',
-                labels: ['Projets', ...uniqueTaskNames], // "Projets" comme première catégorie, puis les tâches
+                type: 'linear',
+                position: 'left',
+                ticks: {
+                    stepSize: 1,
+                    callback: function(value, index) {
+                        const project = projects[Math.floor(value - 1)];
+                        return project ? project.project_name : '';
+                    },
+                },
                 title: {
                     display: true,
-                    text: 'Tâches et Projets',
+                    text: 'Projets',
                 },
             },
         },
-    }), [uniqueTaskNames]);
+    }), [projects]);
 
     return (
-        <div>
+        <div style={{ height: '600px', width: '100%' }}>
             {chartData ? (
                 <Bar data={chartData} options={options} />
             ) : (
