@@ -51,6 +51,7 @@ export default function GestionUser() {
   
     const password = generatePassword();
     const dataToSend = { ...formData, password };
+    const nomProjet=   formData.nom;
 
     try {
       const response = await fetch('http://localhost:3001/users/create-or-update-user', {
@@ -58,11 +59,27 @@ export default function GestionUser() {
         headers: {
           'Content-Type': 'application/json',
         },
+        
         body: JSON.stringify(dataToSend), 
       });
 
       const result = await response.json();
-      if (response.ok) {
+      if (response.ok) {if(formData.id===null){
+        await fetch('http://localhost:3001/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: `Projet ${nomProjet} créé avec succès.` }),
+        });}
+        
+         else{  await fetch('http://localhost:3001/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: `mofication du ${nomProjet}  avec succès.` }),
+        });}
         setMessage('Utilisateur ajouté avec succès avec le mot de passe généré !');
         setFormData({ nom: '', role: '', email: '', password: '' ,id:''}); 
         fetchAvailableUsers(); 
@@ -82,7 +99,13 @@ export default function GestionUser() {
         method: 'DELETE',
       });
 
-      if (response.ok) {
+      if (response.ok) {await fetch('http://localhost:3001/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: `User  avec id ${userId} supprimé avec succès.` }),
+      });
         setMessage('Utilisateur supprimé avec succès');
         fetchAvailableUsers(); 
       } else {

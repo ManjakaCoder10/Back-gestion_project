@@ -90,7 +90,22 @@ const [nomDesigner, setNomDesigner] = useState('');
 
       if (response.ok) {
         setMessage('Projet et tâches ajoutés avec succès');
-  
+   if(id===null){
+    await fetch('http://localhost:3001/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: `Projet ${nomProjet} créé avec succès.` }),
+    });}
+    
+     else{  await fetch('http://localhost:3001/notifications', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: `mofication du ${nomProjet}  avec succès.` }),
+    });}
         setNomProjet('');
         setDescription('');
         setDateDebut('');
@@ -125,7 +140,13 @@ const [nomDesigner, setNomDesigner] = useState('');
         method: 'DELETE',
       });
 
-      if (response.ok) {
+      if (response.ok) {await fetch('http://localhost:3001/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: `Projet  avec id ${project_id} supprimé avec succès.` }),
+      });
         setMessage('Utilisateur supprimé avec succès');
         fetchProject();
       } else {

@@ -3,7 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { TaskModule } from './task/task.module';
-import { ProjectModule } from './project/project.module'; // Ajoutez ce module pour les projets
+import { ProjectModule } from './project/project.module';
+import { NotificationsModule } from './notifications/notifications.module';  
 
 @Module({
   imports: [
@@ -14,12 +15,13 @@ import { ProjectModule } from './project/project.module'; // Ajoutez ce module p
       username: 'root',
       password: '',
       database: 'gestion_projet',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'], // Charge toutes les entités
-      synchronize: true, // Ne pas activer en production
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true, 
     }),
     AuthModule,
     UserModule,TaskModule,
-    ProjectModule, // Ajoutez le module des projets
+    ProjectModule,
+    NotificationsModule, 
   ],
 })
 export class AppModule {}
