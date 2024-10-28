@@ -5,7 +5,47 @@ import GestionUser from './gestion_user';
 import UserPieChart from './PieChart';
 import TaskEvolutionChart from './TaskEvolutionChart';
 import ProjectEvolutionChart from './ProjectEvolutionChart';
+import { XMarkIcon, BellIcon } from '@heroicons/react/24/solid';
 
+function NotificationOverlay({ notifications, onClose }) {
+  return (
+    
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-10 z-50 ">
+    <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-transform duration-500 ease-in-out translate-y-0" >
+      <div className="flex items-center justify-between mb-10">
+        <h2 className="text-2xl font-extrabold text-blue-600 flex items-center">
+          <BellIcon className="h-8 w-8 text-blue-600 mr-2" />
+          Notifications
+        </h2>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition duration-200">
+          <XMarkIcon className="h-6 w-6" />
+        </button>
+      </div>
+      {notifications.length === 0 ? (
+        <p className="text-gray-500 flex items-center justify-center">
+          <BellIcon className="h-6 w-6 text-gray-400 mr-2" />
+          Aucune notification.
+        </p>
+      ) : (
+        <ul className="divide-y divide-gray-200 max-h-64 overflow-y-auto">
+          {notifications.map((notification, index) => (
+            <li key={index} className="flex items-center py-4 space-x-4">
+              <BellIcon className="h-6 w-6 text-blue-500" />
+              <div>
+                <span className="text-gray-800 text-base">{notification.message}</span>
+                <p className="text-gray-500 text-sm mt-1">
+                  {new Date(notification.timestamp).toLocaleString()}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+  <div className='mb-10'><br></br></div>
+    </div>
+  </div>
+  );
+}
 export default function Dashboard() {
   const [completedTasks, setCompletedTasks] = useState<number[]>(Array(30).fill(0));
   const [pendingTasks, setPendingTasks] = useState<number[]>(Array(30).fill(0));
@@ -32,7 +72,7 @@ export default function Dashboard() {
     fetchNotifications();
   }, []);
 
-  // (Code existant pour fetchTaskData, fetchProject, etc.)
+
   useEffect(() => {
     const fetchTaskData = async () => {
       try {
@@ -141,23 +181,12 @@ export default function Dashboard() {
           {showNotifications ? 'Masquer les notifications' : 'Afficher les notifications'}
         </button>
       </div>
-      
+
+
       {showNotifications && (
-        <div className="bg-white p-4 rounded-lg shadow-md">
-          {notifications.length === 0 ? (
-            <p className="text-gray-500">Aucune notification.</p>
-          ) : (
-            <ul className="divide-y divide-gray-200">
-              {notifications.map((notification, index) => (
-                <li key={index} className="py-2 flex items-center">
-                  <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                  <span className="text-gray-800">{notification.message}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <NotificationOverlay notifications={notifications} onClose={toggleNotifications} />
       )}
+     
 
       {/* Reste du code pour afficher les projets, utilisateurs, etc. */}
       {!showGestionProjet && !showGestionUser ? (
