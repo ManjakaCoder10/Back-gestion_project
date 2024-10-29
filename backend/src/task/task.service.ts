@@ -15,10 +15,18 @@ export class TaskService {
 
 
   async getTask(): Promise<Task[]> {
-    const task = await this.TaskRepository.createQueryBuilder('tasj')
+    const task = await this.TaskRepository.createQueryBuilder('task')
       .getMany(); 
 
     return task;
+}
+
+async getTaskByUserId(userId: string): Promise<Task[]> {
+  const tasks = await this.TaskRepository.createQueryBuilder('task')
+    .where('task.userUserId = :userId', { userId }) // Filtre par userId
+    .getMany();
+
+  return tasks;
 }
 
 

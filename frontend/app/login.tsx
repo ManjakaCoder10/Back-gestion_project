@@ -1,9 +1,8 @@
 "use client";
 import { useState } from 'react';
 
-// Définir les types des props, y compris onLoginSuccess
 interface LoginProps {
-  onLoginSuccess: () => void;
+  onLoginSuccess: (data: { isAdmin: boolean; id: string }) => void;
 }
 
 export default function Login({ onLoginSuccess }: LoginProps) {
@@ -24,8 +23,8 @@ export default function Login({ onLoginSuccess }: LoginProps) {
 
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
-      onLoginSuccess();  // Appel de la fonction après le succès du login
+      console.log('Is Admin:', data.isAdmin);  // Vérification pour voir si isAdmin est bien reçu
+      onLoginSuccess({ isAdmin: data.isAdmin, id: data.id });
     } else {
       setErrorMessage('Mot de passe incorrect');
     }

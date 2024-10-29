@@ -9,8 +9,11 @@ export class AuthController {
   async login(@Body('email') email: string, @Body('password') password: string) {
     const user = await this.authService.validateUser(email, password);
     if (!user) {
-      throw new HttpException('Mot de passe incorrect', HttpStatus.UNAUTHORIZED);
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
-    return { message: 'Login réussi', user };
+    return {
+      id: user.user.id, 
+      isAdmin: user.isAdmin,
+    };
   }
 }

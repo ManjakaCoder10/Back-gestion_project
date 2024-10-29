@@ -1,3 +1,4 @@
+// auth.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,12 +11,12 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<User | null> {
-    // Requête à la base de données pour vérifier les informations
+  async validateUser(email: string, password: string): Promise<{ user: { id: number }; isAdmin: boolean } | null> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user && user.password === password) {
-      return user; // Mot de passe correct
+      const isAdmin = user.role === 'admin';
+      return { user: { id: user.user_id }, isAdmin }; 
     }
-    return null; // Mot de passe incorrect
+    return null;
   }
 }

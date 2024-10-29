@@ -1,19 +1,21 @@
-"use client";  // Ajoutez cette ligne en haut du fichier
+"use client";
+
 
 import { useState } from 'react';
-import Login from './login'; 
+import Login from './login';
 import Dashboard from './dashboard';
+import UserInterface from './userInterface';
 
-export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export default function App() {
+  const [user, setUser] = useState<{ isAdmin: boolean; id: string } | null>(null);
 
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
+  const handleLoginSuccess = (data: { isAdmin: boolean; id: string }) => {
+    setUser(data);
   };
 
-  return (
-    <div>
-      {isAuthenticated ? <Dashboard /> : <Login onLoginSuccess={handleLoginSuccess} />}
-    </div>
-  );
+  if (user) {
+    return user.isAdmin ? <Dashboard /> : <UserInterface userId={user.id} />;
+  }
+
+  return <Login onLoginSuccess={handleLoginSuccess} />;
 }
