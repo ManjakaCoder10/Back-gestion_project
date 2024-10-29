@@ -55,52 +55,53 @@ export default function Dashboard() {
   const [showGestionUser, setShowGestionUser] = useState(false); 
   const [devsChart, setDevsChart] = useState([]);
   const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false); // State for notifications visibility
-
+  const [showNotifications, setShowNotifications] = useState(false); 
+  const [showDivNotifications, setShowDivNotifications] = useState(true); 
+  
+  
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/notifications');
+      const data = await response.json();
+      setNotifications(data);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des notifications:', error);
+    }
+  };
   useEffect(() => {
-    // Fetch notifications from notifications.json
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/notifications');
-        const data = await response.json();
-        setNotifications(data);
-      } catch (error) {
-        console.error('Erreur lors de la récupération des notifications:', error);
-      }
-    };
+    
+    
     
     fetchNotifications();
   }, []);
 
+  const fetchTaskData = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/tasks/graphe'); 
+      const tasks = await response.json();
 
+      const completed: number[] = Array(30).fill(0);
+      const pending: number[] = Array(30).fill(0);
+      const today = new Date();
+
+      tasks.forEach((task: { deadline: string }) => {
+        const taskDeadline = new Date(task.deadline);
+        const taskDay = taskDeadline.getDate() - 1; 
+
+        if (taskDeadline < today) {
+          completed[taskDay] += 1;
+        } else {
+          pending[taskDay] += 1;
+        }
+      });
+
+      setCompletedTasks(completed);
+      setPendingTasks(pending);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données des tâches:', error);
+    }
+  };
   useEffect(() => {
-    const fetchTaskData = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/tasks/graphe'); 
-        const tasks = await response.json();
-
-        const completed: number[] = Array(30).fill(0);
-        const pending: number[] = Array(30).fill(0);
-        const today = new Date();
-
-        tasks.forEach((task: { deadline: string }) => {
-          const taskDeadline = new Date(task.deadline);
-          const taskDay = taskDeadline.getDate() - 1; 
-
-          if (taskDeadline < today) {
-            completed[taskDay] += 1;
-          } else {
-            pending[taskDay] += 1;
-          }
-        });
-
-        setCompletedTasks(completed);
-        setPendingTasks(pending);
-      } catch (error) {
-        console.error('Erreur lors de la récupération des données des tâches:', error);
-      }
-    };
-
     fetchTaskData();
   }, []);
 
@@ -150,44 +151,64 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchAvailableUsers();
+   
   }, []);
 
   const handleGestionProjetClick = () => {
+    setShowDivNotifications(false);
     setShowGestionProjet(true); 
     setShowGestionUser(false); 
+
+    
   };
 
   const handleGestionUserClick = () => {
+    setShowDivNotifications(false);
     setShowGestionUser(true); 
     setShowGestionProjet(false); 
+  
   };
 
   const handleBackToDashboardClick = () => {
-    setShowGestionProjet(false); 
-    setShowGestionUser(false); 
+    setShowDivNotifications(true);
+    setShowGestionProjet(false);
+    setShowGestionUser(false);
+  
+    fetchAvailableUsers();
+   
+    fetchProject();
+    fetchUsers();
+    fetchTaskData();
+    fetchNotifications();
   };
+  
+
+
+  
 
   const toggleNotifications = () => {
-    setShowNotifications(!showNotifications); // Toggle notifications visibility
+    setShowNotifications(!showNotifications); //
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center text-blue-600">Tableau de bord</h1>
 
+
+      {showDivNotifications && (
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Notifications</h2>
         <button onClick={toggleNotifications} className="bg-blue-500 text-white p-2 rounded transition duration-300 hover:bg-blue-600">
           {showNotifications ? 'Masquer les notifications' : 'Afficher les notifications'}
         </button>
       </div>
-
+      )}
 
       {showNotifications && (
         <NotificationOverlay notifications={notifications} onClose={toggleNotifications} />
       )}
-     
-
+    
+  
       {/* Reste du code pour afficher les projets, utilisateurs, etc. */}
       {!showGestionProjet && !showGestionUser ? (
         <>

@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Project } from '../entities/project.entity';
 import { Task } from '../entities/task.entity';
 import { CreateProjectDto } from './create-project.dto';
+import { User } from '../entities/user.entity';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class ProjectService {
@@ -12,69 +14,14 @@ export class ProjectService {
     private readonly projectRepository: Repository<Project>,
     @InjectRepository(Task)
     private readonly taskRepository: Repository<Task>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    private mailerService: MailerService,
   ) {}
 
  
 
-  /*async createProject(createProjectDto: CreateProjectDto): Promise<Project> {
-    let project: Project;
-    let task: Task;  // déclaration de task
-    
-    if (createProjectDto.id) {
-      project = await this.projectRepository.findOne({ where: { project_id: createProjectDto.id } });
-      
-      if (!project) {
-        throw new Error(`Le projet avec l'ID ${createProjectDto.id} n'existe pas`);
-      }
-  
-      // Mise à jour des champs du projet
-      project.project_name = createProjectDto.nomProjet;
-      project.description = createProjectDto.description;
-      project.start_date = createProjectDto.dateDebut;
-      project.end_date = createProjectDto.dateFin;
-  
-      const savedProject = await this.projectRepository.save(project);
-  
-      // Gestion des tâches
-      for (const tache of createProjectDto.taches) {
-        task = new Task();  // Initialisation de task ici
-        task.task_name = tache.nom;
-        task.deadline = tache.deadline;
-        task.userUserId = tache.id;
-        task.description = tache.description;
-        task.project = savedProject;
-  
-        await this.taskRepository.save(task);
-      }
-  
-      return savedProject;
-    } else {
-      // Créer un nouveau projet si aucun ID n'est fourni
-      project = new Project();
-      project.project_name = createProjectDto.nomProjet;
-      project.description = createProjectDto.description;
-      project.start_date = createProjectDto.dateDebut;
-      project.end_date = createProjectDto.dateFin;
-  
-      const savedProject = await this.projectRepository.save(project);
-  
-      for (const tache of createProjectDto.taches) {
-        task = new Task();  // Correctement initialisé ici
-        task.task_name = tache.nom;
-        task.deadline = tache.deadline;
-        task.userUserId = tache.id;
-        task.description = tache.description;
-        task.project = savedProject;
-  
-        await this.taskRepository.save(task);
-      }
-  
-      return savedProject;
-    }
-  }
-  */
-
-
+ 
 
   async createProject(createProjectDto: CreateProjectDto): Promise<Project> {
     let project: Project;
@@ -86,7 +33,7 @@ export class ProjectService {
         throw new Error(`Le projet avec l'ID ${createProjectDto.id} n'existe pas`);
       }
   
-      // Mise à jour des champs du projet
+
       project.project_name = createProjectDto.nomProjet;
       project.description = createProjectDto.description;
       project.start_date = createProjectDto.dateDebut;
@@ -94,21 +41,21 @@ export class ProjectService {
   
       const savedProject = await this.projectRepository.save(project);
   
-      // Gestion des tâches
+     
       for (const tache of createProjectDto.taches) {
-        // Vérification si la tâche existe déjà
+        
         let existingTask = await this.taskRepository.findOne({ 
           where: { task_name: tache.nom, project: savedProject }
         });
   
         if (existingTask) {
-          // Mise à jour de la tâche existante
+   
           existingTask.deadline = tache.deadline;
           existingTask.userUserId = tache.id;
           existingTask.description = tache.description;
           await this.taskRepository.save(existingTask);
         } else {
-          // Créer une nouvelle tâche si elle n'existe pas
+         
           const newTask = new Task();
           newTask.task_name = tache.nom;
           newTask.deadline = tache.deadline;
@@ -117,12 +64,21 @@ export class ProjectService {
           newTask.project = savedProject;
   
           await this.taskRepository.save(newTask);
+          let user = await this.userRepository.findOne({ where: { user_id: tache.id } });
+          if (user) {
+          
+    await this.mailerService.sendMail({
+      to: user.email,
+      subject: 'assignation tâche',
+      text: `Bonjour ${user.name},\n\nVous avez une nouvelle tâche assignée: ${tache.nom} avec une date limite le ${tache.deadline}.\n\nDescription: ${tache.description}`,
+    });
+          }
         }
       }
   
       return savedProject;
     } else {
-      // Créer un nouveau projet si aucun ID n'est fourni
+   
       project = new Project();
       project.project_name = createProjectDto.nomProjet;
       project.description = createProjectDto.description;
@@ -131,7 +87,7 @@ export class ProjectService {
   
       const savedProject = await this.projectRepository.save(project);
   
-      // Création des nouvelles tâches
+
       for (const tache of createProjectDto.taches) {
         const task = new Task();
         task.task_name = tache.nom;
@@ -141,6 +97,16 @@ export class ProjectService {
         task.project = savedProject;
   
         await this.taskRepository.save(task);
+        let user = await this.userRepository.findOne({ where: { user_id: tache.id } });
+        if (user) {
+        
+  await this.mailerService.sendMail({
+    to: user.email,
+    subject: 'assignation tâche',
+    text: `Bonjour ${user.name},\n\nVous avez une nouvelle tâche assignée: ${tache.nom} avec une date limite le ${tache.deadline}.\n\nDescription: ${tache.description}`,
+  });
+        }
+      
       }
   
       return savedProject;
@@ -197,8 +163,8 @@ export class ProjectService {
 
   async tableProject(): Promise<Project[]> {
     const projects = await this.projectRepository.createQueryBuilder('Project')
-        .leftJoinAndSelect('Project.tasks', 'Task')   // Joindre les tâches associées aux projets
-        .leftJoinAndSelect('Task.user', 'User')       // Joindre les utilisateurs associés aux tâches
+        .leftJoinAndSelect('Project.tasks', 'Task')   
+        .leftJoinAndSelect('Task.user', 'User')       
         .getMany();
 
     return projects;
