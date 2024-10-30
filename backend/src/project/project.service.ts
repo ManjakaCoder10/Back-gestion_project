@@ -78,7 +78,7 @@ export class ProjectService {
           }
         }
       }
-  
+      this.eventsGateway.handleEntityUpdate('task', { project: savedProject });
       return savedProject;
     } else {
    

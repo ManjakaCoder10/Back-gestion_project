@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { EventsGateway } from './events/events.gateway'
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AuthModule } from './auth/auth.module';
@@ -32,6 +33,7 @@ import { NotificationsModule } from './notifications/notifications.module';
         from: '"No Reply" <noreply@votredomaine.com>',
       },
     }),
+    EventsGateway,
     AuthModule,
     UserModule,
     TaskModule,

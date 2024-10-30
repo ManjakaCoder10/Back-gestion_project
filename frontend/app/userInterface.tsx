@@ -27,22 +27,29 @@ export default function UserInterface({ userId }: UserInterfaceProps) {
   const [showHelp, setShowHelp] = useState(false);
   const [message, setMessage] = useState('');
   const [emailStatus, setEmailStatus] = useState<string | null>(null);
-  const socket = io('http://localhost:3001', {
-    withCredentials: true,
-  });
+ 
+  const socket = io('http://localhost:3001');
   
-
-  socket.on('update', (data) => {
-    if (data.entity === 'task') {
-      console.log('Mise à jour de tâche:', data.data);
-      useEffect(() => {
-   
-    
-        fetchTasks();
-      }, [userId]);
+  useEffect(() => {
+    socket.on('update', (data) => {
+      console.log('Mise à jour reçue:', data);
+      if (data.entity === 'task' ) {
+        console.log('Mise à jour de tâche:', data.data);
+        useEffect(() => {
      
-    }
-  });
+      
+          fetchTasks();
+        }, [userId]);
+       
+      }
+
+    });
+
+    return () => {
+      socket.off('update');
+    };
+  }, []);
+  
   async function fetchTasks() {
     try {
       const response = await fetch(`http://localhost:3001/tasks/assigned?userId=${userId}`);
