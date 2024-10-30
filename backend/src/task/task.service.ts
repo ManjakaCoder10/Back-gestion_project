@@ -1,6 +1,7 @@
 import { Injectable ,NotFoundException  } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventsGateway } from '../events/events.gateway';
 
 import { Task } from '../entities/task.entity';
 
@@ -11,6 +12,7 @@ export class TaskService {
    
     @InjectRepository(Task)
     private TaskRepository: Repository<Task>,
+  
   ) {}
 
 

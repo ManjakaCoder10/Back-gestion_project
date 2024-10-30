@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Helpage from './HelpPage'; 
+import { io } from 'socket.io-client';
 interface Task {
   id: number;
   task_name: string;
@@ -26,24 +27,51 @@ export default function UserInterface({ userId }: UserInterfaceProps) {
   const [showHelp, setShowHelp] = useState(false);
   const [message, setMessage] = useState('');
   const [emailStatus, setEmailStatus] = useState<string | null>(null);
+  const socket = io('http://localhost:3001', {
+    withCredentials: true,
+  });
+  
 
-  useEffect(() => {
-    async function fetchTasks() {
-      try {
-        const response = await fetch(`http://localhost:3001/tasks/assigned?userId=${userId}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setTasks(data);
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-      }
+  socket.on('update', (data) => {
+    if (data.entity === 'task') {
+      console.log('Mise à jour de tâche:', data.data);
+      useEffect(() => {
+   
+    
+        fetchTasks();
+      }, [userId]);
+     
     }
+  });
+  async function fetchTasks() {
+    try {
+      const response = await fetch(`http://localhost:3001/tasks/assigned?userId=${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setTasks(data);
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+    }
+  }
+  useEffect(() => {
+   
     
     fetchTasks();
   }, [userId]);
-
+  useEffect(() => {
+    if (showHelp) {
+      document.body.style.overflow = 'hidden'; // Empêche le défilement de la page principale
+    } else {
+      document.body.style.overflow = 'auto'; // Réactive le défilement de la page principale
+    }
+  
+    // Nettoyage pour éviter tout effet indésirable
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showHelp]);
   useEffect(() => {
     async function fetchUser() {
       try {
@@ -89,7 +117,7 @@ export default function UserInterface({ userId }: UserInterfaceProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 p-8">
       <h1 className="text-2xl font-bold text-center text-blue-800">Bienvenue sur l'Interface Utilisateur</h1>
-      /* Bouton pour afficher la page d'aide */}
+   
       <div className="mt-4 text-center">
         <button 
           onClick={() => setShowHelp(true)} // Ouvrir la page d'aide
@@ -101,18 +129,24 @@ export default function UserInterface({ userId }: UserInterfaceProps) {
 
       {/* Affichage de la page d'aide */}
       {showHelp && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-           <Helpage />
-            <button 
-              onClick={() => setShowHelp(false)} // Fermer la page d'aide
-              className="mt-4 p-2 bg-red-500 text-white rounded"
-            >
-              Fermer
-            </button>
-          </div>
-        </div>
-      )}
+  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white w-full h-full p-6 rounded-lg shadow-lg overflow-y-auto flex flex-col relative" style={{ paddingBottom: '4rem' }}>
+      <div className="min-h-screen">
+        <Helpage />
+      </div>
+      <button 
+        onClick={() => setShowHelp(false)} // Fermer la page d'aide
+        className="absolute top-4 right-4 p-2 text-white bg-red-500 rounded-full"
+        aria-label="Fermer"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+)}
+
       <section className="mt-10">
         <h2 className="text-xl font-semibold text-blue-700 mb-4">Vos informations :</h2>
         <ul className="space-y-4">

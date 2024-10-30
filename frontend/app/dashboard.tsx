@@ -6,28 +6,29 @@ import UserPieChart from './PieChart';
 import TaskEvolutionChart from './TaskEvolutionChart';
 import ProjectEvolutionChart from './ProjectEvolutionChart';
 import { XMarkIcon, BellIcon } from '@heroicons/react/24/solid';
+import Helpage from './HelpPage'; 
 
 function NotificationOverlay({ notifications, onClose }) {
   return (
-    
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-10 z-50 ">
-    <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-transform duration-500 ease-in-out translate-y-0" >
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white w-full h-full p-6 rounded-lg shadow-lg overflow-y-auto flex flex-col relative" style={{ paddingBottom: '4rem' }}>
       <div className="flex items-center justify-between mb-10">
         <h2 className="text-2xl font-extrabold text-blue-600 flex items-center">
           <BellIcon className="h-8 w-8 text-blue-600 mr-2" />
           Notifications
         </h2>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition duration-200">
+        <button onClick={onClose} className="absolute top-4 right-4 p-2 text-white bg-red-500 rounded-full" aria-label="Fermer">
           <XMarkIcon className="h-6 w-6" />
         </button>
       </div>
+  
       {notifications.length === 0 ? (
         <p className="text-gray-500 flex items-center justify-center">
           <BellIcon className="h-6 w-6 text-gray-400 mr-2" />
           Aucune notification.
         </p>
       ) : (
-        <ul className="divide-y divide-gray-200 max-h-64 overflow-y-auto">
+        <ul className="divide-y divide-gray-200 max-h-full overflow-y-auto">
           {notifications.map((notification, index) => (
             <li key={index} className="flex items-center py-4 space-x-4">
               <BellIcon className="h-6 w-6 text-blue-500" />
@@ -41,9 +42,9 @@ function NotificationOverlay({ notifications, onClose }) {
           ))}
         </ul>
       )}
-  <div className='mb-10'><br></br></div>
     </div>
   </div>
+  
   );
 }
 export default function Dashboard() {
@@ -57,6 +58,7 @@ export default function Dashboard() {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false); 
   const [showDivNotifications, setShowDivNotifications] = useState(true); 
+  const [showHelp, setShowHelp] = useState(false);
   
   
   const fetchNotifications = async () => {
@@ -118,7 +120,30 @@ export default function Dashboard() {
   useEffect(() => {
     fetchUsers();
   }, []);
-
+  useEffect(() => {
+    if (showHelp) {
+      document.body.style.overflow = 'hidden'; // Empêche le défilement de la page principale
+    } else {
+      document.body.style.overflow = 'auto'; // Réactive le défilement de la page principale
+    }
+  
+    // Nettoyage pour éviter tout effet indésirable
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showHelp]);
+  useEffect(() => {
+    if (showNotifications) {
+      document.body.style.overflow = 'hidden'; // Empêche le défilement de la page principale
+    } else {
+      document.body.style.overflow = 'auto'; // Réactive le défilement de la page principale
+    }
+  
+    // Nettoyage pour éviter tout effet indésirable
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [showNotifications]);
   const fetchProject = async () => {
     try {
       const response = await fetch('http://localhost:3001/projet/liste/table_project');
@@ -193,8 +218,32 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center text-blue-600">Tableau de bord</h1>
-
-
+      <div className="mt-4 text-center">
+        <button 
+          onClick={() => setShowHelp(true)} // Ouvrir la page d'aide
+          className="p-2 bg-blue-500 text-white rounded"
+        >
+          Aide
+        </button>
+      </div>
+      {showHelp && (
+  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white w-full h-full p-6 rounded-lg shadow-lg overflow-y-auto flex flex-col relative" style={{ paddingBottom: '4rem' }}>
+      <div className="min-h-screen">
+        <Helpage />
+      </div>
+      <button 
+        onClick={() => setShowHelp(false)} // Fermer la page d'aide
+        className="absolute top-4 right-4 p-2 text-white bg-red-500 rounded-full"
+        aria-label="Fermer"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+)}
       {showDivNotifications && (
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Notifications</h2>

@@ -6,6 +6,7 @@ import { Task } from '../entities/task.entity';
 import { CreateProjectDto } from './create-project.dto';
 import { User } from '../entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
+import { EventsGateway } from '../events/events.gateway';
 
 @Injectable()
 export class ProjectService {
@@ -17,6 +18,7 @@ export class ProjectService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private mailerService: MailerService,
+    private eventsGateway: EventsGateway,
   ) {}
 
  
@@ -54,6 +56,7 @@ export class ProjectService {
           existingTask.userUserId = tache.id;
           existingTask.description = tache.description;
           await this.taskRepository.save(existingTask);
+   
         } else {
          
           const newTask = new Task();
@@ -97,6 +100,7 @@ export class ProjectService {
         task.project = savedProject;
   
         await this.taskRepository.save(task);
+     
         let user = await this.userRepository.findOne({ where: { user_id: tache.id } });
         if (user) {
         
@@ -108,7 +112,7 @@ export class ProjectService {
         }
       
       }
-  
+      this.eventsGateway.handleEntityUpdate('task', { project: savedProject });
       return savedProject;
     }
   }
