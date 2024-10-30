@@ -5,7 +5,11 @@ import { User } from '../entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Task } from '../entities/task.entity';
 import { CreateUsertDto } from './create-user.dto';
-
+interface CreateEmailDto {
+  email: string;
+  subject: string;
+  message: string;
+}
 @Injectable()
 export class UserService {
   constructor(
@@ -115,5 +119,24 @@ async createUser(createUserDto: CreateUsertDto): Promise<User> {
       .getMany();
 
     return availableUsers;
+  }
+  async getTaskByUserId(userId: string): Promise<User[]> {
+    const tasks = await this.userRepository.createQueryBuilder('user')
+      .where('user.user_id = :userId', { userId }) // Filtre par userId
+      .getMany();
+  
+    return tasks;
+  }
+  async send_email(createEmailDto: CreateEmailDto) {
+    const { email, subject, message } = createEmailDto;
+
+
+    await this.mailerService.sendMail({
+      to: "fanomezantsoamanjakatsilavina@gmail.com",
+      subject: subject,
+      text: message +"voici mon son email"+ email,
+    });
+
+    return { message: 'Email envoyé avec succès' };
   }
 }
