@@ -5,10 +5,11 @@ import { User } from '../entities/user.entity';
 import { Task } from '../entities/task.entity';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
+import { EventsGateway } from '../events/events.gateway';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Task])], // Importation des entités User et Task
-  providers: [UserService], // Ajout du UserService en tant que fournisseur
-  controllers: [UserController], // Ajout du UserController
+  imports: [TypeOrmModule.forFeature([User, Task])], 
+  providers: [UserService], 
+  controllers: [UserController,,EventsGateway],
 })
 export class UserModule {}

@@ -5,6 +5,7 @@ import { User } from '../entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Task } from '../entities/task.entity';
 import { CreateUsertDto } from './create-user.dto';
+import { EventsGateway } from '../events/events.gateway';
 interface CreateEmailDto {
   email: string;
   subject: string;
@@ -18,6 +19,7 @@ export class UserService {
     @InjectRepository(Task)
     private taskRepository: Repository<Task>,
     private mailerService: MailerService,
+    private eventsGateway: EventsGateway,
 
   ) {}
 
@@ -60,7 +62,7 @@ async createUser(createUserDto: CreateUsertDto): Promise<User> {
     subject: 'Bienvenue sur notre plateforme',
     text: `Bonjour ${user.name},\n\nVotre compte a été créé avec succès !\nVotre mot de passe est : ${user.password}\n\nCordialement,\nL'équipe.`,
   });
-
+  this.eventsGateway.handleEntityUpdate('user', { user: savedUser });
   return savedUser;
 }
 

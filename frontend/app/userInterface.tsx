@@ -34,13 +34,16 @@ export default function UserInterface({ userId }: UserInterfaceProps) {
     socket.on('update', (data) => {
       console.log('Mise à jour reçue:', data);
       if (data.entity === 'task' ) {
-        console.log('Mise à jour de tâche:', data.data);
-        useEffect(() => {
+
+      
      
       
           fetchTasks();
-        }, [userId]);
+      
        
+      }
+      else{
+        fetchUser();
       }
 
     });
@@ -69,29 +72,30 @@ export default function UserInterface({ userId }: UserInterfaceProps) {
   }, [userId]);
   useEffect(() => {
     if (showHelp) {
-      document.body.style.overflow = 'hidden'; // Empêche le défilement de la page principale
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'auto'; // Réactive le défilement de la page principale
+      document.body.style.overflow = 'auto'; 
     }
   
-    // Nettoyage pour éviter tout effet indésirable
     return () => {
       document.body.style.overflow = 'auto';
     };
   }, [showHelp]);
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const response = await fetch(`http://localhost:3001/users/assigned?userId=${userId}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setInfos(data);
-      } catch (error) {
-        console.error('Error fetching user:', error);
+
+  async function fetchUser() {
+    try {
+      const response = await fetch(`http://localhost:3001/users/assigned?userId=${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      const data = await response.json();
+      setInfos(data);
+    } catch (error) {
+      console.error('Error fetching user:', error);
     }
+  }
+  useEffect(() => {
+  
     
     fetchUser();
   }, [userId]);

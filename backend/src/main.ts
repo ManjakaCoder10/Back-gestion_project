@@ -5,12 +5,12 @@ import * as cors from 'cors';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
- /* // Configurer CORS
+
   app.use(cors({
-    origin: 'http://localhost:3000', // Remplacez par l'URL de votre application Next.js
+    origin: 'http://localhost:3000',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true, // Si vous avez besoin d'envoyer des cookies
-  }));*/
+    credentials: true, 
+  }));
 
   await app.listen(3001); // Le port sur lequel NestJS écoute
 }

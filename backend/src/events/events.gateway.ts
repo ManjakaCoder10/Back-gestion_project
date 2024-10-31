@@ -34,6 +34,6 @@ export class EventsGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   // Fonction pour émettre les mises à jour d'entité
   handleEntityUpdate(entity: 'task' | 'user', data: any) {
     this.server.emit('update', { entity, data });
-    console.log(data)
+  
   }
 }
