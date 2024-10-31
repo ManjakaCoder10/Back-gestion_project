@@ -56,13 +56,14 @@ async createUser(createUserDto: CreateUsertDto): Promise<User> {
 
 
   const savedUser = await this.userRepository.save(user);
+  this.eventsGateway.handleEntityUpdate('user', { user: savedUser });
 
   await this.mailerService.sendMail({
     to: user.email,
     subject: 'Bienvenue sur notre plateforme',
     text: `Bonjour ${user.name},\n\nVotre compte a été créé avec succès !\nVotre mot de passe est : ${user.password}\n\nCordialement,\nL'équipe.`,
   });
-  this.eventsGateway.handleEntityUpdate('user', { user: savedUser });
+
   return savedUser;
 }
 

@@ -9,7 +9,7 @@ import { EventsGateway } from '../events/events.gateway';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Task])], 
-  providers: [UserService], 
-  controllers: [UserController,,EventsGateway],
+  providers: [UserService ,EventsGateway], 
+  controllers: [UserController],
 })
 export class UserModule {}

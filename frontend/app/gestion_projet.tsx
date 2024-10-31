@@ -1,37 +1,20 @@
-
-
-"use client";
 import React, { useEffect, useState } from 'react';
 
 export default function GestionProjet() {
   const [nomProjet, setNomProjet] = useState('');
-  const [id,  setProjectId] = useState(null);
+  const [id, setProjectId] = useState(null);
   const [Project, setProject] = useState([]);
   const [description, setDescription] = useState('');
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
-const[essai ,setessai]=useState(false);
-  const [nomDev, setNomDev] = useState('');
-const [nomConcepteur, setNomConcepteur] = useState('');
-const [nomDesigner, setNomDesigner] = useState('');
-
-  
-
-  const [tacheDev, setTacheDev] = useState('développeur');
-  const [deadlineDev, setDeadlineDev] = useState('');
-  const [devs, setDevs] = useState([]);
-  const [IDdevs, setIDdevs] = useState('');
-  
-  const [tacheConcepteur, setTacheConcepteur] = useState('concepteur');
-  const [deadlineConcepteur, setDeadlineConcepteur] = useState('');
-  const [IDConcepteur, setIDConcepteur] = useState('');
-  
-  const [tacheDesigner, setTacheDesigner] = useState('designer');
-  const [deadlineDesigner, setDeadlineDesigner] = useState('');
-  const [IDDesigner, setIDDesigner] = useState('');
-  
   const [message, setMessage] = useState('');
+  const [devs, setDevs] = useState([]);
+  const [tasks, setTasks] = useState([{ nom: '', deadline: '', id: '' }]);
 
+  useEffect(() => {
+    fetchAvailableUsers();
+    fetchProject();
+  }, []);
 
   const fetchAvailableUsers = async () => {
     try {
@@ -43,25 +26,40 @@ const [nomDesigner, setNomDesigner] = useState('');
     }
   };
 
-  useEffect(() => {
-    fetchAvailableUsers();
-  }, []);
-  
-    const fetchProject = async () => {
-      try {
-        const response = await fetch('http://localhost:3001/projet/liste/table_project');
-        if (!response.ok) {
-          throw new Error('Erreur lors de la récupération des utilisateurs');
-        }
-        const data = await response.json();
-        setProject(data);
-      } catch (error) {
-        console.error('Erreur:', error);
+  const handleDelete = async (project_id) => {
+    try {
+      const response = await fetch(`http://localhost:3001/projet/${project_id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await fetch('http://localhost:3001/notifications', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ message: `Projet avec id ${project_id} supprimé avec succès.` }),
+        });
+        setMessage('Projet supprimé avec succès');
+        fetchProject();
+      } else {
+        setMessage('Erreur lors de la suppression du projet');
       }
-    };
-    useEffect(() => {
-    fetchProject();
-  }, []);
+    } catch (error) {
+      console.error('Erreur lors de la suppression du projet:', error);
+      setMessage('Erreur lors de la suppression du projet');
+    }
+  };
+
+  const fetchProject = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/projet/liste/table_project');
+      const data = await response.json();
+      setProject(data);
+    } catch (error) {
+      console.error('Erreur:', error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,138 +70,69 @@ const [nomDesigner, setNomDesigner] = useState('');
       description,
       dateDebut,
       dateFin,
-      taches: [
-        { nom: tacheDev, deadline: deadlineDev,id:IDdevs,description:description },
-        { nom: tacheConcepteur, deadline: deadlineConcepteur,id:IDConcepteur,description:description },
-        { nom: tacheDesigner, deadline: deadlineDesigner,id:IDDesigner,description:description },
-      ],
+      taches: tasks,
     };
 
     try {
-      const response = await fetch('http://localhost:3001/projet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch(`http://localhost:3001/projet${id ? `/${id}` : ''}`, {
+        method: id ? 'PUT' : 'POST', // Utiliser PUT pour la mise à jour, POST pour un nouveau projet
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projetData),
       });
 
       if (response.ok) {
-        setMessage('Projet et tâches ajoutés avec succès');
-   if(id===null){
-    await fetch('http://localhost:3001/notifications', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: `Projet ${nomProjet} créé avec succès.` }),
-    });}
-    
-     else{  await fetch('http://localhost:3001/notifications', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: `mofication du ${nomProjet}  avec succès.` }),
-    });}
-        setNomProjet('');
-        setDescription('');
-        setDateDebut('');
-        setDateFin('');
-  
-        setDeadlineDev('');
-        setessai(false);
-        setDeadlineConcepteur('');
-        setNomDev('');
-        
-        setNomConcepteur('');
-        setNomDesigner('');
-        setDeadlineDesigner('');
-        setIDDesigner('');
-        setIDConcepteur('');
-        setIDdevs('');
-        setProjectId(null);
+        setMessage(id ? 'Projet mis à jour avec succès' : 'Projet et tâches ajoutés avec succès');
+        resetForm();
         fetchProject();
-
       } else {
-        setMessage('Erreur lors de l\'ajout du projet et des tâches');
+        setMessage("Erreur lors de l'ajout ou de la mise à jour du projet et des tâches");
       }
     } catch (error) {
-      console.error('Erreur:', error);
-      setMessage('Erreur lors de l\'envoi des données');
+      console.error('Erreur lors de l\'envoi des données', error);
+      setMessage("Erreur lors de l'envoi des données");
     }
   };
 
-  const handleDelete = async (project_id) => {
-    try {
-      const response = await fetch(`http://localhost:3001/projet/${project_id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {await fetch('http://localhost:3001/notifications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: `Projet  avec id ${project_id} supprimé avec succès.` }),
-      });
-        setMessage('Utilisateur supprimé avec succès');
-        fetchProject();
-      } else {
-        setMessage('Erreur lors de la suppression de l\'utilisateur');
-      }
-    } catch (error) {
-      console.error('Erreur lors de la suppression de l\'utilisateur:', error);
-      setMessage('Erreur lors de la suppression de l\'utilisateur');
-    }
+  const resetForm = () => {
+    setNomProjet('');
+    setDescription('');
+    setDateDebut('');
+    setDateFin('');
+    setTasks([{ nom: '', deadline: '', id: '' }]);
+    setProjectId(null);
   };
 
-  
- 
-const modifier = (project) => {
-  const formatDateTimeLocal = (dateString) => {
-    const date = new Date(dateString);
-    return date.toISOString().slice(0, 16); 
+  const addTask = () => {
+    setTasks([...tasks, { nom: '', deadline: '', id: '' }]);
   };
 
-  setessai(true);
-  setNomProjet(project.project_name);
-  setDescription(project.description);
-  setDateDebut(formatDateTimeLocal(project.start_date));
-  setDateFin(formatDateTimeLocal(project.end_date));
-  setProjectId(project.project_id);
+  const removeTask = (index) => {
+    setTasks(tasks.filter((_, i) => i !== index));
+  };
 
+  const handleTaskChange = (index, field, value) => {
+    const updatedTasks = tasks.map((task, i) => 
+      i === index ? { ...task, [field]: value } : task
+    );
+    setTasks(updatedTasks);
+  };
 
-  const devTask = project.tasks.find(task => task.task_name === 'développeur');
-  const concepteurTask = project.tasks.find(task => task.task_name === 'concepteur');
-  const designerTask = project.tasks.find(task => task.task_name === 'designer');
-
-  // Développeur
-  setIDdevs(devTask ? devTask.user_id : '');
-  setDeadlineDev(devTask ? formatDateTimeLocal(devTask.deadline) : '');
-  setNomDev(devTask ? devs.find(user => user.user_id === devTask. userUserId)?.name || 'Utilisateur inconnu' : '');
-
-  // Concepteur
-  setIDConcepteur(concepteurTask ? concepteurTask.user_id : '');
-  setDeadlineConcepteur(concepteurTask ? formatDateTimeLocal(concepteurTask.deadline) : '');
-  setNomConcepteur(concepteurTask ? devs.find(user => user.user_id === concepteurTask.userUserId)?.name || 'Utilisateur inconnu' : '');
-  console.log(devTask.user_id, devs);
-
-  // Designer
-  setIDDesigner(designerTask ? designerTask.user_id : '');
-  setDeadlineDesigner(designerTask ? formatDateTimeLocal(designerTask.deadline) : '');
-  setNomDesigner(designerTask ? devs.find(user => user.user_id === designerTask.userUserId)?.name || 'Utilisateur inconnu' : '');
-};
-
-
-
+  const handleEdit = (project) => {
+    setProjectId(project.project_id);
+    setNomProjet(project.project_name);
+    setDescription(project.description);
+    setDateDebut(project.start_date);
+    setDateFin(project.end_date);
+    setTasks(project.tasks);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-4xl font-bold mb-8 text-center text-blue-600">Ajouter un nouveau projet</h1>
-
+      <h1 className="text-4xl font-bold mb-8 text-center text-blue-600">Ajouter ou Modifier un projet</h1>
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-        {/* Projet */}
+        
+        {/* Formulaire */}
+        {/*... (Même formulaire que dans votre code initial) */}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Nom du projet :</label>
           <input
@@ -215,6 +144,7 @@ const modifier = (project) => {
           />
         </div>
 
+        {/* Description */}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Description :</label>
           <textarea
@@ -225,10 +155,11 @@ const modifier = (project) => {
           ></textarea>
         </div>
 
+        {/* Date de début */}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Date de début :</label>
           <input
-            type="datetime-local"
+            type="date"
             value={dateDebut}
             onChange={(e) => setDateDebut(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -236,10 +167,11 @@ const modifier = (project) => {
           />
         </div>
 
+        {/* Date de fin */}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Date de fin :</label>
           <input
-            type="datetime-local"
+            type="date"
             value={dateFin}
             onChange={(e) => setDateFin(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -247,121 +179,69 @@ const modifier = (project) => {
           />
         </div>
 
-    
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Développeur :</label>
-          <input
-            type="datetime-local"
-            value={deadlineDev}
-            onChange={(e) => setDeadlineDev(e.target.value)}
-            className="w-full p-2 border rounded text-gray-800"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Responsable Développeur :</label>
-          <div className="mb-4">
-          <select
-  value={IDdevs}
-  onChange={(e) => setIDdevs(e.target.value)}
-  className="w-full p-2 border rounded text-gray-800"
->
-  <option value="">{nomDev || "Sélectionner un développeur"}</option>
-  {devs.length === 0 ? (
-    <option value="">aucun</option>
-  ) : (
-    devs.map((user) => (
-      <option key={user.user_id} value={user.user_id}>
-        {user.name}
-      </option>
-    ))
-  )}
-</select>
+        {/* Tâches Dynamiques */}
+        {tasks.map((task, index) => (
+          <div key={index} className="mb-4 border p-4 rounded-lg">
+            <h3 className="text-xl font-semibold mb-2">Tâche {index + 1}</h3>
 
-</div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Nom de la tâche :</label>
+            <input
+              type="text"
+              value={task.nom}
+              onChange={(e) => handleTaskChange(index, 'nom', e.target.value)}
+              className="w-full p-2 border rounded text-gray-800"
+              required
+            />
 
-        </div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Date limite :</label>
+            <input
+              type="datetime-local"
+              value={task.deadline}
+              onChange={(e) => handleTaskChange(index, 'deadline', e.target.value)}
+              className="w-full p-2 border rounded text-gray-800"
+              required
+            />
 
-        {/* Tâche Concepteur */}
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Concepteur :</label>
-          <input
-            type="datetime-local"
-            value={deadlineConcepteur}
-            onChange={(e) => setDeadlineConcepteur(e.target.value)}
-            className="w-full p-2 border rounded text-gray-800"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Responsable Concepteur :</label>
-          <select
-            value={IDConcepteur}
-            onChange={(e) => setIDConcepteur(e.target.value)}
-            className="w-full p-2 border rounded text-gray-800"
-           
-          >
-       <option value="">{nomConcepteur || "Sélectionner un concepteur"}</option>
-            {devs.length === 0 ? (
-              <option value="">aucun</option>
-            ) : (
-              devs.map((user) => (
+            <label className="block text-gray-700 text-sm font-bold mb-2">Responsable :</label>
+            <select
+              value={task.id}
+              onChange={(e) => handleTaskChange(index, 'id', e.target.value)}
+              className="w-full p-2 border rounded text-gray-800"
+              required
+            >
+              <option value="">Sélectionner un responsable</option>
+              {devs.map((user) => (
                 <option key={user.user_id} value={user.user_id}>
                   {user.name}
                 </option>
-              ))
-            )}
-          </select>
-        </div>
+              ))}
+            </select>
 
-        {/* Tâche Designer */}
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Deadline Designer :</label>
-          <input
-            type="datetime-local"
-            value={deadlineDesigner}
-            onChange={(e) => setDeadlineDesigner(e.target.value)}
-            className="w-full p-2 border rounded text-gray-800"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Responsable Designer :</label>
-          <select
-            value={IDDesigner}
-            onChange={(e) => setIDDesigner(e.target.value)}
-            className="w-full p-2 border rounded text-gray-800"
-    
-          >
-             <option value="">{nomDesigner || "Sélectionner un designer"}</option>
-            {devs.length === 0 ? (
-              <option value="">aucun</option>
-            ) : (
-              devs.map((user) => (
-                <option key={user.user_id} value={user.user_id}>
-                  {user.name}
-                </option>
-              ))
-            )}
-          </select>
-        </div>
+            <button type="button" onClick={() => removeTask(index)} className="mt-2 text-red-500">
+              Supprimer cette tâche
+            </button>
+          </div>
+        ))}
 
         <button
-          type="submit"
-          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300"
+          type="button"
+          onClick={addTask}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4"
         >
-          Ajouter le projet et les tâches
+          Ajouter une tâche
         </button>
-      </form>
 
-      {message && <p className="mt-4 text-center">{message}</p>}
+        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-md mt-4">
+          Enregistrer le projet
+        </button>
 
+        {message && <p className="mt-4 text-center text-green-500">{message}</p>}
 
-      <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-  <h2 className="text-2xl font-bold mb-4 text-blue-500">Project</h2>
-
-  <table className="min-w-full bg-white border-collapse">
-    <thead>
+        {/* Liste des projets */}
+        <div className="bg-white p-6 rounded-lg shadow-md mt-6">
+          <h2 className="text-2xl font-bold mb-4 text-blue-500">Projets</h2>
+          <table className="min-w-full bg-white border-collapse">
+          <thead>
       <tr>
         <th className="border px-4 py-2 text-left">Nom du projet</th>
         <th className="border px-4 py-2 text-left">Description</th>
@@ -396,8 +276,9 @@ const modifier = (project) => {
             </td>
             <td className="border px-4 py-2 text-center">
               <button
-                onClick={() => modifier(project)}
+            
                 className="bg-yellow-500 text-white py-1 px-2 rounded mr-2 hover:bg-yellow-600"
+                onClick={() => handleEdit(project)}
               >
                 Modifier
               </button>
@@ -412,9 +293,9 @@ const modifier = (project) => {
         ))
       )}
     </tbody>
-  </table>
-</div>
-
+          </table>
+        </div>
+      </form>
     </div>
   );
 }
