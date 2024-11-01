@@ -8,6 +8,8 @@ export class Task {
   task_id: number;
   @Column({ type: 'int' })
   userUserId: number;
+  @Column({ nullable: true })
+  projectProjectId: number;
 
   @Column()
   task_name: string;

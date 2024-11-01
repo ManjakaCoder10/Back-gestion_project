@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 export default function GestionProjet() {
   const [nomProjet, setNomProjet] = useState('');
   const [id, setProjectId] = useState(null);
-  const [Project, setProject] = useState([]);
+  const [projects, setProjects] = useState([]); // Correction de la variable de projet
   const [description, setDescription] = useState('');
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
@@ -13,7 +13,7 @@ export default function GestionProjet() {
 
   useEffect(() => {
     fetchAvailableUsers();
-    fetchProject();
+    fetchProjects(); // Renommé pour être plus clair
   }, []);
 
   const fetchAvailableUsers = async () => {
@@ -41,7 +41,7 @@ export default function GestionProjet() {
           body: JSON.stringify({ message: `Projet avec id ${project_id} supprimé avec succès.` }),
         });
         setMessage('Projet supprimé avec succès');
-        fetchProject();
+        fetchProjects(); // Renommé pour être cohérent
       } else {
         setMessage('Erreur lors de la suppression du projet');
       }
@@ -51,11 +51,11 @@ export default function GestionProjet() {
     }
   };
 
-  const fetchProject = async () => {
+  const fetchProjects = async () => { // Correction du nom de la fonction
     try {
       const response = await fetch('http://localhost:3001/projet/liste/table_project');
       const data = await response.json();
-      setProject(data);
+      setProjects(data); // Correction de la variable de projet
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -63,36 +63,36 @@ export default function GestionProjet() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     const projetData = {
       id,
       nomProjet,
       description,
       dateDebut,
       dateFin,
-      taches: tasks,
+      taches: tasks.filter(task => !task.deleted), // Filtrer les tâches supprimées
     };
-
+  
     try {
       const response = await fetch(`http://localhost:3001/projet${id ? `/${id}` : ''}`, {
-        method: id ? 'PUT' : 'POST', // Utiliser PUT pour la mise à jour, POST pour un nouveau projet
+        method: id ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(projetData),
       });
-
+  
       if (response.ok) {
         setMessage(id ? 'Projet mis à jour avec succès' : 'Projet et tâches ajoutés avec succès');
         resetForm();
-        fetchProject();
+        fetchProjects(); // Renommé pour être cohérent
       } else {
         setMessage("Erreur lors de l'ajout ou de la mise à jour du projet et des tâches");
       }
     } catch (error) {
-      console.error('Erreur lors de l\'envoi des données', error);
+      console.error("Erreur lors de l'envoi des données", error);
       setMessage("Erreur lors de l'envoi des données");
     }
   };
-
+  
   const resetForm = () => {
     setNomProjet('');
     setDescription('');
@@ -105,9 +105,11 @@ export default function GestionProjet() {
   const addTask = () => {
     setTasks([...tasks, { nom: '', deadline: '', id: '' }]);
   };
-
+  
   const removeTask = (index) => {
-    setTasks(tasks.filter((_, i) => i !== index));
+    setTasks(prevTasks => prevTasks.map((task, i) =>
+      i === index ? { ...task, deleted: true } : task
+    ));
   };
 
   const handleTaskChange = (index, field, value) => {
@@ -118,21 +120,31 @@ export default function GestionProjet() {
   };
 
   const handleEdit = (project) => {
+    const formatDateTimeLocal = (dateString) => {
+      const date = new Date(dateString);
+      return date.toISOString().slice(0, 16); 
+    };
+  
     setProjectId(project.project_id);
     setNomProjet(project.project_name);
     setDescription(project.description);
-    setDateDebut(project.start_date);
-    setDateFin(project.end_date);
-    setTasks(project.tasks);
+    setDateDebut(formatDateTimeLocal(project.start_date));
+    setDateFin(formatDateTimeLocal(project.end_date));
+    
+    const formattedTasks = project.tasks.map((task) => ({
+      nom: task.task_name,
+      deadline: formatDateTimeLocal(task.deadline),
+      id: task.userUserId || '',
+    }));
+    setTasks(formattedTasks);
   };
-
+  
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-4xl font-bold mb-8 text-center text-blue-600">Ajouter ou Modifier un projet</h1>
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
         
         {/* Formulaire */}
-        {/*... (Même formulaire que dans votre code initial) */}
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Nom du projet :</label>
           <input
@@ -159,7 +171,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Date de début :</label>
           <input
-            type="date"
+            type="datetime-local"
             value={dateDebut}
             onChange={(e) => setDateDebut(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -171,7 +183,7 @@ export default function GestionProjet() {
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2">Date de fin :</label>
           <input
-            type="date"
+            type="datetime-local"
             value={dateFin}
             onChange={(e) => setDateFin(e.target.value)}
             className="w-full p-2 border rounded text-gray-800"
@@ -180,10 +192,9 @@ export default function GestionProjet() {
         </div>
 
         {/* Tâches Dynamiques */}
-        {tasks.map((task, index) => (
+        {tasks.filter(task => !task.deleted).map((task, index) => (
           <div key={index} className="mb-4 border p-4 rounded-lg">
             <h3 className="text-xl font-semibold mb-2">Tâche {index + 1}</h3>
-
             <label className="block text-gray-700 text-sm font-bold mb-2">Nom de la tâche :</label>
             <input
               type="text"
@@ -192,7 +203,6 @@ export default function GestionProjet() {
               className="w-full p-2 border rounded text-gray-800"
               required
             />
-
             <label className="block text-gray-700 text-sm font-bold mb-2">Date limite :</label>
             <input
               type="datetime-local"
@@ -201,7 +211,6 @@ export default function GestionProjet() {
               className="w-full p-2 border rounded text-gray-800"
               required
             />
-
             <label className="block text-gray-700 text-sm font-bold mb-2">Responsable :</label>
             <select
               value={task.id}
@@ -216,86 +225,47 @@ export default function GestionProjet() {
                 </option>
               ))}
             </select>
-
             <button type="button" onClick={() => removeTask(index)} className="mt-2 text-red-500">
               Supprimer cette tâche
             </button>
           </div>
         ))}
-
         <button
           type="button"
           onClick={addTask}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4"
         >
           Ajouter une tâche
         </button>
 
-        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-md mt-4">
-          Enregistrer le projet
+        {/* Message */}
+        {message && <div className="mb-4 text-green-500">{message}</div>}
+        <button
+          type="submit"
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          {id ? 'Modifier le projet' : 'Ajouter le projet'}
         </button>
-
-        {message && <p className="mt-4 text-center text-green-500">{message}</p>}
-
-        {/* Liste des projets */}
-        <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-          <h2 className="text-2xl font-bold mb-4 text-blue-500">Projets</h2>
-          <table className="min-w-full bg-white border-collapse">
-          <thead>
-      <tr>
-        <th className="border px-4 py-2 text-left">Nom du projet</th>
-        <th className="border px-4 py-2 text-left">Description</th>
-        <th className="border px-4 py-2 text-left">Date de début</th>
-        <th className="border px-4 py-2 text-left">Date de fin</th>
-        <th className="border px-4 py-2 text-left">Tâches</th>
-        <th className="border px-4 py-2">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {Project.length === 0 ? (
-        <tr>
-          <td className="border px-4 py-2 text-center" colSpan={6}>
-            Aucun projet disponible ce mois-ci
-          </td>
-        </tr>
-      ) : (
-        Project.map((project) => (
-          <tr key={project.project_id} className="border-t">
-            <td className="border px-4 py-2">{project.project_name}</td>
-            <td className="border px-4 py-2">{project.description}</td>
-            <td className="border px-4 py-2">{project.start_date}</td>
-            <td className="border px-4 py-2">{project.end_date}</td>
-            <td className="border px-4 py-2">
-              <ul>
-                {project.tasks.map((task) => (
-                  <li key={task.task_id}>
-                    {task.task_name} - Assigné à : {task.user ? task.user.name : 'Non assigné'}
-                  </li>
-                ))}
-              </ul>
-            </td>
-            <td className="border px-4 py-2 text-center">
-              <button
-            
-                className="bg-yellow-500 text-white py-1 px-2 rounded mr-2 hover:bg-yellow-600"
-                onClick={() => handleEdit(project)}
-              >
-                Modifier
-              </button>
-              <button
-                onClick={() => handleDelete(project.project_id)}
-                className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600"
-              >
-                Supprimer
-              </button>
-            </td>
-          </tr>
-        ))
-      )}
-    </tbody>
-          </table>
-        </div>
       </form>
+
+      {/* Liste des Projets */}
+      <h2 className="text-3xl font-bold mt-8 mb-4">Liste des Projets</h2>
+      <ul className="space-y-4">
+        {projects.map((project) => (
+          <li key={project.project_id} className="bg-white p-4 rounded-lg shadow">
+            <h3 className="text-xl font-semibold">{project.project_name}</h3>
+            <p>{project.description}</p>
+            <p><strong>Date de début :</strong> {new Date(project.start_date).toLocaleString()}</p>
+            <p><strong>Date de fin :</strong> {new Date(project.end_date).toLocaleString()}</p>
+            <button onClick={() => handleEdit(project)} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700 mr-2">
+              Modifier
+            </button>
+            <button onClick={() => handleDelete(project.project_id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">
+              Supprimer
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
