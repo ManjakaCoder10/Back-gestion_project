@@ -22,12 +22,10 @@ export class ProjectService {
   ) {}
 
  
-
   async createProject(createProjectDto: CreateProjectDto): Promise<Project> {
     let project: Project;
-    let task :Task;
   
-    // Vérifier si un ID de projet est fourni pour mettre à jour un projet existant
+    // Vérifier si un ID de projet est fourni pour la mise à jour
     if (createProjectDto.id) {
       project = await this.projectRepository.findOne({
         where: { project_id: createProjectDto.id },
@@ -38,38 +36,44 @@ export class ProjectService {
         throw new Error(`Le projet avec l'ID ${createProjectDto.id} n'existe pas`);
       }
   
-      // Supprimer toutes les tâches existantes associées au projet
- 
-      await this.taskRepository.delete({ projectProjectId: createProjectDto.id });
-  
       // Mise à jour des informations du projet
       project.project_name = createProjectDto.nomProjet;
       project.description = createProjectDto.description;
       project.start_date = createProjectDto.dateDebut;
       project.end_date = createProjectDto.dateFin;
   
+      // Sauvegarder le projet mis à jour
       const savedProject = await this.projectRepository.save(project);
   
-      // Créer et enregistrer les nouvelles tâches associées au projet mis à jour
-      const newTasks = createProjectDto.taches.map((tache) => {
-        const task = new Task();
+      // Traiter les tâches du projet
+      const updatedTasks = createProjectDto.taches.map((tache) => {
+        const task = project.tasks.find((t) => t.task_id === tache.taskid) || new Task();
         task.task_name = tache.nom;
         task.deadline = tache.deadline;
         task.userUserId = tache.id;
-        task.description = createProjectDto.description;
+        task.description = tache.description || createProjectDto.description;
         task.project = savedProject;
         return task;
       });
-      await this.taskRepository.save(newTasks);
+  
+      // Supprimer les tâches qui ne sont plus présentes
+      const taskIdsToKeep = createProjectDto.taches.map((t) => t.taskid).filter(Boolean);
+      const tasksToDelete = project.tasks.filter(
+        (existingTask) => !taskIdsToKeep.includes(existingTask.task_id)
+      );
+      await this.taskRepository.remove(tasksToDelete);
+  
+      // Sauvegarder les nouvelles et mises à jour des tâches
+      await this.taskRepository.save(updatedTasks);
   
       // Envoyer un e-mail aux utilisateurs assignés aux nouvelles tâches
-      for (const tache of createProjectDto.taches) {
-        const user = await this.userRepository.findOne({ where: { user_id: tache.id } });
+      for (const task of updatedTasks) {
+        const user = await this.userRepository.findOne({ where: { user_id: task.userUserId } });
         if (user) {
           await this.mailerService.sendMail({
             to: user.email,
             subject: 'Assignation de tâche',
-            text: `Bonjour ${user.name},\n\nVous avez une nouvelle tâche assignée : ${tache.nom} avec une date limite le ${tache.deadline}.\n\nDescription : ${tache.description}`,
+            text: `Bonjour ${user.name},\n\nVous avez une nouvelle tâche assignée : ${task.task_name} avec une date limite le ${task.deadline}.\n\nDescription : ${task.description}`,
           });
         }
       }
@@ -77,9 +81,8 @@ export class ProjectService {
       // Notifier la mise à jour des tâches via le service d'événements
       this.eventsGateway.handleEntityUpdate('task', { project: savedProject });
       return savedProject;
-  
     } else {
-      // Création d'un nouveau projet s'il n'y a pas d'ID de projet
+      // Création d'un nouveau projet si aucun ID n'est fourni
       project = new Project();
       project.project_name = createProjectDto.nomProjet;
       project.description = createProjectDto.description;
@@ -94,20 +97,20 @@ export class ProjectService {
         task.task_name = tache.nom;
         task.deadline = tache.deadline;
         task.userUserId = tache.id;
-        task.description = createProjectDto.description;
+        task.description = tache.description || createProjectDto.description;
         task.project = savedProject;
         return task;
       });
       await this.taskRepository.save(tasks);
   
       // Envoyer un e-mail aux utilisateurs assignés
-      for (const tache of createProjectDto.taches) {
-        const user = await this.userRepository.findOne({ where: { user_id: tache.id } });
+      for (const task of tasks) {
+        const user = await this.userRepository.findOne({ where: { user_id: task.userUserId } });
         if (user) {
           await this.mailerService.sendMail({
             to: user.email,
             subject: 'Assignation de tâche',
-            text: `Bonjour ${user.name},\n\nVous avez une nouvelle tâche assignée : ${tache.nom} avec une date limite le ${tache.deadline}.\n\nDescription : ${tache.description}`,
+            text: `Bonjour ${user.name},\n\nVous avez une nouvelle tâche assignée : ${task.task_name} avec une date limite le ${task.deadline}.\n\nDescription : ${task.description}`,
           });
         }
       }
@@ -117,7 +120,6 @@ export class ProjectService {
       return savedProject;
     }
   }
-  
   
 
 

@@ -4,6 +4,6 @@ export class CreateProjectDto {
     description: string;
     dateDebut: Date;
     dateFin: Date;
-    taches: { nom: string,description: string,  id: number ,deadline: Date }[];
+    taches: { nom: string,description: string,  id: number ,deadline: Date ,taskid?:number}[];
   }
   

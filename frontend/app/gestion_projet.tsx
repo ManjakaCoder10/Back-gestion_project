@@ -9,7 +9,7 @@ export default function GestionProjet() {
   const [dateFin, setDateFin] = useState('');
   const [message, setMessage] = useState('');
   const [devs, setDevs] = useState([]);
-  const [tasks, setTasks] = useState([{ nom: '', deadline: '', id: '' }]);
+  const [tasks, setTasks] = useState([{taskID:'', nom: '', deadline: '', id: '' }]);
 
   useEffect(() => {
     fetchAvailableUsers();
@@ -98,12 +98,12 @@ export default function GestionProjet() {
     setDescription('');
     setDateDebut('');
     setDateFin('');
-    setTasks([{ nom: '', deadline: '', id: '' }]);
+    setTasks([{taskID:'', nom: '', deadline: '', id: '' }]);
     setProjectId(null);
   };
 
   const addTask = () => {
-    setTasks([...tasks, { nom: '', deadline: '', id: '' }]);
+    setTasks([...tasks, {taskID:'', nom: '', deadline: '', id: '' }]);
   };
   
   const removeTask = (index) => {
@@ -132,9 +132,10 @@ export default function GestionProjet() {
     setDateFin(formatDateTimeLocal(project.end_date));
     
     const formattedTasks = project.tasks.map((task) => ({
+      taskID:task.task_id || '',
       nom: task.task_name,
       deadline: formatDateTimeLocal(task.deadline),
-      id: task.userUserId || '',
+      id: task.userUserId,
     }));
     setTasks(formattedTasks);
   };

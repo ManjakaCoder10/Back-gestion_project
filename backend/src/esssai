@@ -939,3 +939,119 @@ async createProject(createProjectDto: CreateProjectDto): Promise<Project> {
       return savedProject;
     }
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async createProject(createProjectDto: CreateProjectDto): Promise<Project> {
+    let project: Project;
+  
+    if (createProjectDto.id) {
+      project = await this.projectRepository.findOne({
+        where: { project_id: createProjectDto.id },
+        relations: ['tasks'],
+      });
+  
+      if (!project) {
+        throw new Error(`Le projet avec l'ID ${createProjectDto.id} n'existe pas`);
+      }
+  
+      // Récupérer les tâches existantes
+      const existingTasks = project.tasks || [];
+  
+      // Supprimer toutes les tâches existantes associées au projet
+      await this.taskRepository.delete({ project: { project_id: createProjectDto.id } });
+  
+      // Mise à jour des informations du projet
+      project.project_name = createProjectDto.nomProjet;
+      project.description = createProjectDto.description;
+      project.start_date = createProjectDto.dateDebut;
+      project.end_date = createProjectDto.dateFin;
+  
+      const savedProject = await this.projectRepository.save(project);
+  
+      // Filtrer les tâches pour éviter les doublons
+      const newTasks = createProjectDto.taches
+        .filter((tache) => {
+          // Vérifie si la tâche existe déjà dans le projet
+          return !existingTasks.some(
+            (existingTask) =>
+              existingTask.task_name === tache.nom && existingTask.userUserId === tache.id
+          );
+        })
+        .map((tache) => {
+          const task = new Task();
+          task.task_name = tache.nom;
+          task.deadline = tache.deadline;
+          task.userUserId = tache.id;
+          task.description = tache.description || createProjectDto.description;
+          task.project = savedProject;
+          return task;
+        });
+  
+      await this.taskRepository.save(newTasks);
+  
+      // Envoyer un e-mail aux utilisateurs assignés aux nouvelles tâches
+      for (const tache of newTasks) {
+        const user = await this.userRepository.findOne({ where: { user_id: tache.userUserId } });
+        if (user) {
+          await this.mailerService.sendMail({
+            to: user.email,
+            subject: 'Assignation de tâche',
+            text: `Bonjour ${user.name},\n\nVous avez une nouvelle tâche assignée : ${tache.task_name} avec une date limite le ${tache.deadline}.\n\nDescription : ${tache.description}`,
+          });
+        }
+      }
+  
+      // Notifier la mise à jour des tâches via le service d'événements
+      this.eventsGateway.handleEntityUpdate('task', { project: savedProject });
+      return savedProject;
+    } else {
+      // Création d'un nouveau projet s'il n'y a pas d'ID de projet
+      project = new Project();
+      project.project_name = createProjectDto.nomProjet;
+      project.description = createProjectDto.description;
+      project.start_date = createProjectDto.dateDebut;
+      project.end_date = createProjectDto.dateFin;
+  
+      const savedProject = await this.projectRepository.save(project);
+  
+      // Création des tâches pour le nouveau projet
+      const tasks = createProjectDto.taches.map((tache) => {
+        const task = new Task();
+        task.task_name = tache.nom;
+        task.deadline = tache.deadline;
+        task.userUserId = tache.id;
+        task.description = tache.description || createProjectDto.description;
+        task.project = savedProject;
+        return task;
+      });
+      await this.taskRepository.save(tasks);
+  
+      // Envoyer un e-mail aux utilisateurs assignés
+      for (const tache of tasks) {
+        const user = await this.userRepository.findOne({ where: { user_id: tache.userUserId } });
+        if (user) {
+          await this.mailerService.sendMail({
+            to: user.email,
+            subject: 'Assignation de tâche',
+            text: `Bonjour ${user.name},\n\nVous avez une nouvelle tâche assignée : ${tache.task_name} avec une date limite le ${tache.deadline}.\n\nDescription : ${tache.description}`,
+          });
+        }
+      }
+  
+      // Notifier la création des tâches via le service d'événements
+      this.eventsGateway.handleEntityUpdate('task', { project: savedProject });
+      return savedProject;
+    }
+  }
