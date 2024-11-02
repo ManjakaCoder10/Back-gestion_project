@@ -3,17 +3,17 @@ import React, { useEffect, useState } from 'react';
 export default function GestionProjet() {
   const [nomProjet, setNomProjet] = useState('');
   const [id, setProjectId] = useState(null);
-  const [projects, setProjects] = useState([]); // Correction de la variable de projet
+  const [projects, setProjects] = useState([]);
   const [description, setDescription] = useState('');
   const [dateDebut, setDateDebut] = useState('');
   const [dateFin, setDateFin] = useState('');
   const [message, setMessage] = useState('');
   const [devs, setDevs] = useState([]);
-  const [tasks, setTasks] = useState([{taskID:'', nom: '', deadline: '', id: '' }]);
+  const [tasks, setTasks] = useState([{ taskID: '', nom: '', deadline: '', id: '' }]);
 
   useEffect(() => {
     fetchAvailableUsers();
-    fetchProjects(); // Renommé pour être plus clair
+    fetchProjects();
   }, []);
 
   const fetchAvailableUsers = async () => {
@@ -41,7 +41,7 @@ export default function GestionProjet() {
           body: JSON.stringify({ message: `Projet avec id ${project_id} supprimé avec succès.` }),
         });
         setMessage('Projet supprimé avec succès');
-        fetchProjects(); // Renommé pour être cohérent
+        fetchProjects();
       } else {
         setMessage('Erreur lors de la suppression du projet');
       }
@@ -51,11 +51,11 @@ export default function GestionProjet() {
     }
   };
 
-  const fetchProjects = async () => { // Correction du nom de la fonction
+  const fetchProjects = async () => {
     try {
       const response = await fetch('http://localhost:3001/projet/liste/table_project');
       const data = await response.json();
-      setProjects(data); // Correction de la variable de projet
+      setProjects(data);
     } catch (error) {
       console.error('Erreur:', error);
     }
@@ -70,7 +70,7 @@ export default function GestionProjet() {
       description,
       dateDebut,
       dateFin,
-      taches: tasks.filter(task => !task.deleted), // Filtrer les tâches supprimées
+      taches: tasks.filter(task => !task.deleted),
     };
   
     try {
@@ -83,7 +83,7 @@ export default function GestionProjet() {
       if (response.ok) {
         setMessage(id ? 'Projet mis à jour avec succès' : 'Projet et tâches ajoutés avec succès');
         resetForm();
-        fetchProjects(); // Renommé pour être cohérent
+        fetchProjects();
       } else {
         setMessage("Erreur lors de l'ajout ou de la mise à jour du projet et des tâches");
       }
@@ -98,18 +98,16 @@ export default function GestionProjet() {
     setDescription('');
     setDateDebut('');
     setDateFin('');
-    setTasks([{taskID:'', nom: '', deadline: '', id: '' }]);
+    setTasks([{ taskID: '', nom: '', deadline: '', id: '' }]);
     setProjectId(null);
   };
 
   const addTask = () => {
-    setTasks([...tasks, {taskID:'', nom: '', deadline: '', id: '' }]);
+    setTasks([...tasks, { taskID: '', nom: '', deadline: '', id: '' }]);
   };
   
   const removeTask = (index) => {
-    setTasks(prevTasks => prevTasks.map((task, i) =>
-      i === index ? { ...task, deleted: true } : task
-    ));
+    setTasks(prevTasks => prevTasks.filter((_, i) => i !== index));
   };
 
   const handleTaskChange = (index, field, value) => {
@@ -132,7 +130,7 @@ export default function GestionProjet() {
     setDateFin(formatDateTimeLocal(project.end_date));
     
     const formattedTasks = project.tasks.map((task) => ({
-      taskID:task.task_id || '',
+      taskID: task.task_id || '',
       nom: task.task_name,
       deadline: formatDateTimeLocal(task.deadline),
       id: task.userUserId,
@@ -193,7 +191,7 @@ export default function GestionProjet() {
         </div>
 
         {/* Tâches Dynamiques */}
-        {tasks.filter(task => !task.deleted).map((task, index) => (
+        {tasks.map((task, index) => (
           <div key={index} className="mb-4 border p-4 rounded-lg">
             <h3 className="text-xl font-semibold mb-2">Tâche {index + 1}</h3>
             <label className="block text-gray-700 text-sm font-bold mb-2">Nom de la tâche :</label>
@@ -239,34 +237,44 @@ export default function GestionProjet() {
           Ajouter une tâche
         </button>
 
-        {/* Message */}
-        {message && <div className="mb-4 text-green-500">{message}</div>}
-        <button
-          type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          {id ? 'Modifier le projet' : 'Ajouter le projet'}
+        {/* Bouton de soumission */}
+        <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-700">
+          {id ? 'Mettre à jour le projet' : 'Ajouter le projet'}
         </button>
       </form>
 
-      {/* Liste des Projets */}
-      <h2 className="text-3xl font-bold mt-8 mb-4">Liste des Projets</h2>
-      <ul className="space-y-4">
-        {projects.map((project) => (
-          <li key={project.project_id} className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-xl font-semibold">{project.project_name}</h3>
-            <p>{project.description}</p>
-            <p><strong>Date de début :</strong> {new Date(project.start_date).toLocaleString()}</p>
-            <p><strong>Date de fin :</strong> {new Date(project.end_date).toLocaleString()}</p>
-            <button onClick={() => handleEdit(project)} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-700 mr-2">
-              Modifier
-            </button>
-            <button onClick={() => handleDelete(project.project_id)} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700">
-              Supprimer
-            </button>
-          </li>
-        ))}
-      </ul>
+      {/* Affichage des projets */}
+      <div className="mt-8">
+        <h2 className="text-3xl font-semibold mb-4">Liste des projets</h2>
+        <ul className="bg-white p-6 rounded-lg shadow-md">
+          {projects.map((project) => (
+            <li key={project.project_id} className="border-b last:border-none py-4 flex justify-between">
+              <span>{project.project_name}</span>
+              <div>
+                <button
+                  onClick={() => handleEdit(project)}
+                  className="text-blue-500 hover:text-blue-700 mr-4"
+                >
+                  Modifier
+                </button>
+                <button
+                  onClick={() => handleDelete(project.project_id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Supprimer
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Message de retour */}
+      {message && (
+        <div className="mt-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          {message}
+        </div>
+      )}
     </div>
   );
 }

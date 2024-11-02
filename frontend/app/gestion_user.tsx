@@ -130,100 +130,101 @@ export default function GestionUser() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-4xl font-bold mb-8 text-center text-blue-600">Ajouter un utilisateur</h1>
-
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Nom :</label>
-          <input
-            type="text"
-            name="nom"
-            value={formData.nom}
-            onChange={handleChange}
-            className="w-full p-2 border rounded text-gray-800"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Rôle :</label>
-          <input
-            type="text"
-            name="role"
-            value={formData.role}
-            onChange={handleChange}
-            className="w-full p-2 border rounded text-gray-800"
-            required
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2">Email :</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded text-gray-800"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition duration-300"
-        >
-          Ajouter l'utilisateur
-        </button>
-      </form>
-
-      {message && <p className="mt-4 text-center">{message}</p>}
-
-      <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-        <h2 className="text-2xl font-bold mb-4 text-blue-500">User</h2>
-
-        <table className="min-w-full bg-white border-collapse">
-          <thead>
+    <h1 className="text-4xl font-bold mb-8 text-center text-blue-600 animate-fadeInDown">Ajouter un utilisateur</h1>
+  
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300 ease-out">
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">Nom :</label>
+        <input
+          type="text"
+          name="nom"
+          value={formData.nom}
+          onChange={handleChange}
+          className="w-full p-2 border rounded text-gray-800 focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out"
+          required
+        />
+      </div>
+  
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">Rôle :</label>
+        <input
+          type="text"
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          className="w-full p-2 border rounded text-gray-800 focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out"
+          required
+        />
+      </div>
+  
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">Email :</label>
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full p-2 border rounded text-gray-800 focus:ring-2 focus:ring-blue-300 transition duration-300 ease-in-out"
+          required
+        />
+      </div>
+  
+      <button
+        type="submit"
+        className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 hover:shadow-lg transition duration-300 ease-in-out"
+      >
+        Ajouter l'utilisateur
+      </button>
+    </form>
+  
+    {message && <p className="mt-4 text-center text-green-500 animate-fadeIn">{message}</p>}
+  
+    <div className="bg-white p-6 rounded-lg shadow-md mt-6 animate-fadeInUp">
+      <h2 className="text-2xl font-bold mb-4 text-blue-500">User</h2>
+  
+      <table className="min-w-full bg-white border-collapse">
+        <thead>
+          <tr>
+            <th className="border px-4 py-2 text-left">Nom</th>
+            <th className="border px-4 py-2 text-left">Rôle</th>
+            <th className="border px-4 py-2 text-left">Email</th>
+            <th className="border px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {User.length === 0 ? (
             <tr>
-              <th className="border px-4 py-2 text-left">Nom</th>
-              <th className="border px-4 py-2 text-left">Rôle</th>
-              <th className="border px-4 py-2 text-left">Email</th>
-              <th className="border px-4 py-2">Actions</th>
+              <td className="border px-4 py-2 text-center" colSpan="4">
+                Aucun utilisateur disponible ce mois-ci
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {User.length === 0 ? (
-              <tr>
-                <td className="border px-4 py-2 text-center" colSpan="4">
-                  Aucun utilisateur disponible ce mois-ci
+          ) : (
+            User.map((user) => (
+              <tr key={user.user_id} className="border-t hover:bg-gray-100 transition duration-150 ease-in-out">
+                <td className="border px-4 py-2">{user.name}</td>
+                <td className="border px-4 py-2">{user.role}</td>
+                <td className="border px-4 py-2">{user.email}</td>
+                <td className="border px-4 py-2 text-center">
+                  <button
+                    onClick={() => handleEdit(user)}
+                    className="bg-yellow-500 text-white py-1 px-2 rounded mr-2 hover:bg-yellow-600 transition duration-300 ease-in-out"
+                  >
+                    Modifier
+                  </button>
+                  <button
+                    onClick={() => handleDelete(user.user_id)}
+                    className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600 transition duration-300 ease-in-out"
+                  >
+                    Supprimer
+                  </button>
                 </td>
               </tr>
-            ) : (
-              User.map((user) => (
-                <tr key={user.user_id} className="border-t">
-                  <td className="border px-4 py-2">{user.name}</td>
-                  <td className="border px-4 py-2">{user.role}</td>
-                  <td className="border px-4 py-2">{user.email}</td>
-                  <td className="border px-4 py-2 text-center">
-                    <button
-                      onClick={() => handleEdit(user)}
-                      className="bg-yellow-500 text-white py-1 px-2 rounded mr-2 hover:bg-yellow-600"
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user.user_id)}
-                      className="bg-red-500 text-white py-1 px-2 rounded hover:bg-red-600"
-                    >
-                      Supprimer
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
+  </div>
+  
   );
 }

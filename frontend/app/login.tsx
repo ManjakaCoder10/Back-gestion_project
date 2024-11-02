@@ -31,28 +31,56 @@ export default function Login({ onLoginSuccess }: LoginProps) {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl mb-4">Login</h2>
+<div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-50 to-gray-100">
+  <div className="flex items-center justify-between max-w-5xl bg-white shadow-2xl rounded-lg overflow-hidden">
+    {/* Image de connexion à gauche */}
+    <div className="w-1/2 hidden lg:flex items-center justify-center bg-blue-500">
+      <img 
+        src="https://source.unsplash.com/featured/?login" 
+        alt="Login Symbol" 
+        className="h-3/4 transform transition-transform duration-500 hover:scale-105"
+      />
+    </div>
+
+    {/* Formulaire de connexion à droite */}
+    <div className="w-full lg:w-1/2 p-8">
+      <h2 className="text-3xl font-bold text-gray-700 text-center mb-6">Connexion</h2>
+      <form onSubmit={handleSubmit} className="space-y-5">
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Adresse e-mail"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
         />
         <input
           type="password"
           placeholder="Mot de passe"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">
+        <button 
+          type="submit" 
+          className="w-full p-3 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-300 ease-in-out transform hover:-translate-y-1"
+        >
           Se connecter
         </button>
-        {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
+        {errorMessage && <p className="text-red-500 mt-2 text-center">{errorMessage}</p>}
       </form>
+
+      {/* Liens supplémentaires */}
+      <div className="mt-6 text-center">
+        <p className="text-gray-600">Pas encore de compte ? 
+          <a href="#" className="text-blue-500 hover:underline ml-1">Inscrivez-vous</a>
+        </p>
+        <p className="text-gray-600 mt-2">Mot de passe oublié ? 
+          <a href="#" className="text-blue-500 hover:underline ml-1">Réinitialisez-le</a>
+        </p>
+      </div>
     </div>
+  </div>
+</div>
+
   );
 }

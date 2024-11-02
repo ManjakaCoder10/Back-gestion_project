@@ -2,43 +2,52 @@ import { useEffect, useState } from 'react';
 
 export default function HelpPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 p-8">
-      <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Aide et Informations</h1>
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">À propos de notre application</h2>
-        <p className="text-gray-600 mb-4">
-          Cette application vous permet de transférer des fichiers facilement entre appareils via WiFi. 
-          Utilisez cette page pour trouver des informations utiles et des conseils sur l'utilisation de l'application.
+<div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 p-10">
+  <h1 className="text-5xl font-extrabold text-center text-gray-800 mb-10">
+    Assistance et Informations
+  </h1>
+  <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-2xl p-8">
+    
+    <h2 className="text-3xl font-semibold text-gray-700 mb-6">
+      À propos de <span className="text-blue-600">gestion_projet</span>
+    </h2>
+    <p className="text-gray-600 mb-6 leading-relaxed">
+      L'application <span className="font-semibold text-blue-600">gestion_projet</span> permet aux utilisateurs et administrateurs de gérer et partager des fichiers, documents et données liés aux projets en toute simplicité. 
+      Trouvez ici des informations et astuces pour optimiser son utilisation.
+    </p>
+    
+    <h2 className="text-3xl font-semibold text-gray-700 mb-6">Guide d'utilisation</h2>
+    <ol className="list-decimal list-inside mb-6 space-y-2 text-gray-600">
+      <li>Connectez vos appareils au même réseau sécurisé.</li>
+      <li>En tant qu'utilisateur, naviguez vers la section projet pour accéder aux documents partagés.</li>
+      <li>En tant qu'administrateur, accédez aux paramètres pour gérer les utilisateurs et permissions de projet.</li>
+      <li>Sélectionnez le fichier que vous souhaitez transférer ou mettre à jour.</li>
+      <li>Suivez les étapes de validation pour compléter l'action.</li>
+    </ol>
+    
+    <h2 className="text-3xl font-semibold text-gray-700 mb-6">FAQ</h2>
+    <div className="space-y-4">
+      <div>
+        <h3 className="font-semibold text-gray-700">Q : Comment gérer les autorisations de fichier ?</h3>
+        <p className="text-gray-600">
+          R : Les administrateurs peuvent gérer les autorisations dans la section paramètres, en attribuant les rôles nécessaires aux utilisateurs de projet.
         </p>
-
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Comment utiliser l'application</h2>
-        <ul className="list-disc list-inside mb-4">
-          <li className="text-gray-600">1. Connectez vos appareils au même réseau WiFi.</li>
-          <li className="text-gray-600">2. Sélectionnez le fichier que vous souhaitez envoyer.</li>
-          <li className="text-gray-600">3. Choisissez l'appareil destinataire dans la liste.</li>
-          <li className="text-gray-600">4. Cliquez sur le bouton "Envoyer" pour commencer le transfert.</li>
-        </ul>
-
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">FAQ</h2>
-        <div className="mb-4">
-          <h3 className="font-semibold text-gray-600">Q: Pourquoi ne puis-je pas voir d'autres appareils ?</h3>
-          <p className="text-gray-600">
-            R: Assurez-vous que tous les appareils sont connectés au même réseau WiFi et que l'application est ouverte sur chaque appareil.
-          </p>
-        </div>
-        <div className="mb-4">
-          <h3 className="font-semibold text-gray-600">Q: Quels types de fichiers puis-je envoyer ?</h3>
-          <p className="text-gray-600">
-            R: Vous pouvez envoyer des fichiers d'images, de documents PDF, et plus encore. Assurez-vous que le format est pris en charge par l'application.
-          </p>
-        </div>
-
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Nous contacter</h2>
-        <p className="text-gray-600 mb-4">
-          Si vous avez d'autres questions, n'hésitez pas à nous contacter à l'adresse suivante : 
-          <a href="mailto:support@example.com" className="text-blue-500 hover:underline"> support@example.com</a>.
+      </div>
+      <div>
+        <h3 className="font-semibold text-gray-700">Q : Quels formats de fichier sont pris en charge ?</h3>
+        <p className="text-gray-600">
+          R : Vous pouvez gérer et partager divers formats de fichiers tels que PDF, images, et documents texte. Vérifiez la compatibilité de chaque type de fichier dans les paramètres.
         </p>
       </div>
     </div>
+
+    <h2 className="text-3xl font-semibold text-gray-700 mb-6">Contactez-nous</h2>
+    <p className="text-gray-600">
+      Si vous avez d'autres questions, n'hésitez pas à nous écrire à 
+      <a href="mailto:support@gestion_projet.com" className="text-blue-500 hover:underline ml-1">support@gestion_projet.com</a>.
+    </p>
+  </div>
+</div>
+
   );
 }
