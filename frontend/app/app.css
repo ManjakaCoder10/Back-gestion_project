@@ -1,0 +1,29 @@
+.custom-circle {
+  margin-top: 1cm;
+    position: absolute;
+    display: flex;
+    justify-content: space-around;
+    width: 130px; /* Ajustez la taille selon vos besoins */
+    height: 160px; /* La moitié de la largeur pour former un demi-cercle */
+    transform: rotate(0deg); /* Contrôlez l'angle du demi-cercle */
+  }
+  
+  .custom-circle button:nth-child(1) {
+    transform: translate(-55px, -60px); /* Positionner le premier bouton */
+  }
+  
+  .custom-circle button:nth-child(2) {
+    transform: translate(-50px, -40px); /* Positionner le deuxième bouton */
+  }
+  
+  .custom-circle button:nth-child(3) {
+    transform: translate(40px, -55px); /* Positionner le troisième bouton */
+  }
+  .rotate-45 {
+    transform: rotate(45deg);
+  }
+  
+  .rotate-0 {
+    transform: rotate(0deg);
+  }
+  

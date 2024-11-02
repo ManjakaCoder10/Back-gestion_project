@@ -7,6 +7,8 @@ import TaskEvolutionChart from './TaskEvolutionChart';
 import ProjectEvolutionChart from './ProjectEvolutionChart';
 import { XMarkIcon, BellIcon } from '@heroicons/react/24/solid';
 import Helpage from './HelpPage'; 
+import './app.css';
+
 
 function NotificationOverlay({ notifications, onClose }) {
   return (
@@ -15,7 +17,7 @@ function NotificationOverlay({ notifications, onClose }) {
       <div className="flex items-center justify-between mb-10">
         <h2 className="text-2xl font-extrabold text-blue-600 flex items-center">
           <BellIcon className="h-8 w-8 text-blue-600 mr-2" />
-          Notifications
+          Historique
         </h2>
         <button onClick={onClose} className="absolute top-4 right-4 p-2 text-white bg-red-500 rounded-full" aria-label="Fermer">
           <XMarkIcon className="h-6 w-6" />
@@ -59,6 +61,7 @@ export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false); 
   const [showDivNotifications, setShowDivNotifications] = useState(true); 
   const [showHelp, setShowHelp] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   
   const handleLogout = () => {
     // Ici, vous pouvez également supprimer les données de session si nécessaire
@@ -208,7 +211,7 @@ export default function Dashboard() {
     fetchProject();
     fetchUsers();
     fetchTaskData();
-    fetchNotifications();
+
   };
   
 
@@ -221,6 +224,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
+
 <div className="flex justify-between items-center mb-4">
   <h1 className="text-5xl font-bold text-blue-600 flex items-center space-x-2">
     <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -229,33 +233,42 @@ export default function Dashboard() {
     <span>Table de Contrôle</span>
   </h1>
 
-  <div className="flex items-center space-x-6">
-    {/* Notification Button */}
+  <div className="relative flex items-center space-x-6">
+    {/* Button Show Menu */}
     <button
-      onClick={() => setShowNotifications(!showNotifications)}
-      className="p-3 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
-      aria-label="Notifications"
+      onClick={() => setShowMenu(!showMenu)}
+      className="p-3 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-transform transform duration-300"
+      aria-label={showMenu ? "Hide Menu" : "Show Menu"}
     >
-      <img src="/lhistoire.png" alt="Déconnexion" className="h-8 w-8" />
+      <div className={`transition-transform transform duration-300 ${showMenu ? "rotate-45" : "rotate-0"}`}>
+        {showMenu ? (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {/* Icône de fermeture (croix) */}
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            {/* Icône de menu */}
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
+      </div>
     </button>
 
-    {/* Help Button */}
-    <button
-      onClick={() => setShowHelp(true)}
-      className="p-3 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition"
-      aria-label="Aide"
-    >
-      <img src="/point-dinterrogation.png" alt="Déconnexion" className="h-8 w-8" />
-    </button>
-
-    {/* Logout Button */}
-    <button
-      className="p-3 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition"
-      aria-label="Déconnexion"
-      onClick={handleLogout}
-    >
-      <img src="/se-deconnecter.png" alt="Déconnexion" className="h-8 w-8" />
-    </button>
+    {/* Circular Menu */}
+    {showMenu && (
+      <div className="absolute top-0 right-0 transform translate-x-6 -translate-y-12 flex flex-col items-center space-y-4 custom-circle">
+        <button className="p-3 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition" aria-label="Notifications" onClick={() =>{ setShowNotifications(!showNotifications);fetchNotifications()}}>
+          <img src="/lhistoire.png" alt="Notifications" className="h-6 w-6" />
+        </button>
+        <button className="p-3 rounded-full bg-green-100 text-green-600 hover:bg-green-200 transition" aria-label="Aide" onClick={() => setShowHelp(true)}>
+          <img src="/point-dinterrogation.png" alt="Aide" className="h-6 w-6" />
+        </button>
+        <button className="p-3 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition" aria-label="Déconnexion" onClick={handleLogout}>
+          <img src="/se-deconnecter.png" alt="Déconnexion" className="h-6 w-6" />
+        </button>
+      </div>
+    )}
   </div>
 </div>
 
@@ -290,7 +303,7 @@ export default function Dashboard() {
       {/* Reste du code pour afficher les projets, utilisateurs, etc. */}
       {!showGestionProjet && !showGestionUser ? (
         <>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 " style={{marginTop:'3cm'}}>
             <div
               onClick={handleGestionProjetClick}
               className="bg-blue-500 text-white p-6 rounded-lg shadow-md cursor-pointer hover:bg-blue-600 transition duration-300"
