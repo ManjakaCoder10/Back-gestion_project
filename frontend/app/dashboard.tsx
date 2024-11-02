@@ -64,8 +64,7 @@ export default function Dashboard() {
   const [showMenu, setShowMenu] = useState(false);
   
   const handleLogout = () => {
-    // Ici, vous pouvez également supprimer les données de session si nécessaire
-    // localStorage.removeItem('user'); // Exemple pour le localStorage
+  
     window.location.reload(); // Recharge la page
   };
   const fetchNotifications = async () => {
@@ -227,9 +226,7 @@ export default function Dashboard() {
 
 <div className="flex justify-between items-center mb-4">
   <h1 className="text-5xl font-bold text-blue-600 flex items-center space-x-2">
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6h18M3 12h18M3 18h18" />
-    </svg>
+  <img src="/dashboard-icons.png" alt="Dashboard" className="h-10 w-10" />
     <span>Table de Contrôle</span>
   </h1>
 
@@ -321,38 +318,38 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-md mt-6">
-            <h2 className="text-2xl font-bold mb-4 text-blue-500">Utilisateurs disponibles</h2>
-
-            <table className="min-w-full bg-white border-collapse">
-              <thead>
-                <tr>
-                  <th className="border px-4 py-2 text-left">ID</th>
-                  <th className="border px-4 py-2 text-left">Nom</th>
-                  <th className="border px-4 py-2 text-left">Email</th>
-                  <th className="border px-4 py-2 text-left">Rôle</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length === 0 ? (
-                  <tr>
-                    <td className="border px-4 py-2 text-center">
-                      Aucun utilisateur disponible ce mois-ci
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((user) => (
-                    <tr key={user.id} className="border-t">
-                      <td className="border px-4 py-2">{user.user_id}</td>
-                      <td className="border px-4 py-2">{user.name}</td>
-                      <td className="border px-4 py-2">{user.email}</td>
-                      <td className="border px-4 py-2">{user.role}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-6 fade-in">
+  <h2 className="text-2xl font-extrabold mb-6 text-blue-600 text-center">Utilisateurs disponibles</h2>
+  
+  <table className="min-w-full bg-white border-collapse rounded-lg shadow table-striped">
+    <thead>
+      <tr className="table-header">
+        <th className="border px-6 py-3 text-left">ID</th>
+        <th className="border px-6 py-3 text-left">Nom</th>
+        <th className="border px-6 py-3 text-left">Email</th>
+        <th className="border px-6 py-3 text-left">Rôle</th>
+      </tr>
+    </thead>
+    <tbody>
+      {users.length === 0 ? (
+        <tr>
+          <td colSpan="4" className="border px-4 py-6 text-center text-gray-500">
+            Aucun utilisateur disponible ce mois-ci
+          </td>
+        </tr>
+      ) : (
+        users.map((user) => (
+          <tr key={user.id} className="border-t table-row-hover">
+            <td className="border px-6 py-3 text-gray-800">{user.user_id}</td>
+            <td className="border px-6 py-3 text-gray-800">{user.name}</td>
+            <td className="border px-6 py-3 text-gray-800">{user.email}</td>
+            <td className="border px-6 py-3 text-gray-800">{user.role}</td>
+          </tr>
+        ))
+      )}
+    </tbody>
+  </table>
+</div>
 
           <div className="grid grid-cols-2 gap-6 mt-6">
             <div className="bg-white p-6 rounded-lg shadow-md">

@@ -44,7 +44,6 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
         const datasets: any[] = [];
 
         projects.forEach((project, projectIndex) => {
-            // Ligne pour la durée du projet
             const projectLineData = [
                 { x: new Date(project.start_date), y: projectIndex + 1 },
                 { x: new Date(project.end_date), y: projectIndex + 1 }
@@ -58,14 +57,14 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
                 backgroundColor: 'rgba(54, 162, 235, 0.3)',
                 fill: false,
                 tension: 0.3,
-                pointRadius: 5,
+                pointRadius: 6,
+                pointHoverRadius: 8,
                 borderWidth: 2,
             });
 
-            // Barres pour les tâches du projet avec positionnement unique en y
             const taskData = project.tasks.map((task, taskIndex) => ({
                 x: new Date(task.deadline),
-                y: projectIndex + 1 + taskIndex * 0.1, // Position légèrement décalée pour éviter le chevauchement
+                y: projectIndex + 1 + taskIndex * 0.1,
                 task_name: task.task_name
             }));
 
@@ -77,6 +76,7 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
                 barThickness: 8,
+                hoverBackgroundColor: 'rgba(75, 192, 192, 0.7)',
             });
         });
 
@@ -88,12 +88,29 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
         plugins: {
             legend: {
                 position: 'top',
+                labels: {
+                    color: '#333',
+                    font: {
+                        size: 14,
+                        weight: 'bold',
+                    }
+                }
             },
             title: {
                 display: true,
                 text: 'Évolution des projets et des tâches',
+                color: '#444',
+                font: {
+                    size: 18,
+                    weight: 'bold',
+                }
             },
             tooltip: {
+                backgroundColor: '#222',
+                bodyColor: '#fff',
+                titleColor: '#fff',
+                borderWidth: 1,
+                borderColor: '#ddd',
                 callbacks: {
                     label: function(context: any) {
                         const taskName = context.raw.task_name;
@@ -101,6 +118,11 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
                     }
                 }
             }
+        },
+        animation: {
+            duration: 1500,
+            easing: 'easeOutElastic',
+           
         },
         scales: {
             x: {
@@ -115,6 +137,11 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
                 title: {
                     display: true,
                     text: 'Dates',
+                    color: '#444',
+                    font: {
+                        size: 16,
+                        weight: 'bold',
+                    }
                 },
             },
             y: {
@@ -130,13 +157,18 @@ const ProjectEvolutionChart: React.FC<ProjectEvolutionChartProps> = ({ projects 
                 title: {
                     display: true,
                     text: 'Projets',
+                    color: '#444',
+                    font: {
+                        size: 16,
+                        weight: 'bold',
+                    }
                 },
             },
         },
     }), [projects]);
 
     return (
-        <div style={{ height: '600px', width: '100%' }}>
+        <div style={{ height: '600px', width: '100%' }} className="fade-in">
             {chartData ? (
                 <Bar data={chartData} options={options} />
             ) : (

@@ -36,7 +36,7 @@ export default function Login({ onLoginSuccess }: LoginProps) {
     {/* Image de connexion à gauche */}
     <div className="w-1/2 hidden lg:flex items-center justify-center bg-blue-500">
       <img 
-        src="https://source.unsplash.com/featured/?login" 
+        src="/3d-computer-website-loading-speed-test.jpg" 
         alt="Login Symbol" 
         className="h-3/4 transform transition-transform duration-500 hover:scale-105"
       />
