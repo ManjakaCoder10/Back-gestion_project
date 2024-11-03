@@ -178,55 +178,56 @@ export default function GestionUser() {
       </button>
     </form>
   
-    {message && <p className="mt-4 text-center text-green-500 animate-fadeIn">{message}</p>}
+    {message && <p className="mt-4 text-center text-green-100 animate-fadeIn">{message}</p>}
   
     <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-lg shadow-lg mt-6 animate-fadeInUp transition-transform duration-300 hover:scale-105">
   <h2 className="text-3xl font-extrabold mb-4 text-blue-600">User</h2>
 
   <table className="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden">
-    <thead>
-      <tr className="bg-gray-800 text-white">
-        <th className="border px-6 py-3 text-left">Nom</th>
-        <th className="border px-6 py-3 text-left">Rôle</th>
-        <th className="border px-6 py-3 text-left">Email</th>
-        <th className="border px-6 py-3 text-center">Actions</th>
+  <thead>
+    <tr className="bg-gray-600 text-white"> {/* Fond légèrement plus clair */}
+      <th className="border px-6 py-3 text-left">Nom</th>
+      <th className="border px-6 py-3 text-left">Rôle</th>
+      <th className="border px-6 py-3 text-left">Email</th>
+      <th className="border px-6 py-3 text-center">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {User.length === 0 ? (
+      <tr>
+        <td className="border px-6 py-3 text-center text-gray-700" colSpan="4">
+          Aucun utilisateur disponible ce mois-ci
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      {User.length === 0 ? (
-        <tr>
-          <td className="border px-6 py-3 text-center text-gray-700" colSpan="4">
-            Aucun utilisateur disponible ce mois-ci
+    ) : (
+      User.map((user) => (
+        <tr
+          key={user.user_id}
+          className="border-t bg-gray-50 hover:bg-gray-100 transition-colors duration-150 ease-in-out"
+        >
+          <td className="border px-6 py-3 text-gray-800">{user.name}</td>
+          <td className="border px-6 py-3 text-gray-800">{user.role}</td>
+          <td className="border px-6 py-3 text-gray-800">{user.email}</td>
+          <td className="border px-6 py-3 text-center">
+            <button
+              onClick={() => handleEdit(user)}
+              className="bg-yellow-500 text-white py-2 px-4 rounded-md mr-2 hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              Modifier
+            </button>
+            <button
+              onClick={() => handleDelete(user.user_id)}
+              className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              Supprimer
+            </button>
           </td>
         </tr>
-      ) : (
-        User.map((user) => (
-          <tr
-            key={user.user_id}
-            className="border-t bg-gray-50 hover:bg-gray-100 transition-colors duration-150 ease-in-out"
-          >
-            <td className="border px-6 py-3 text-gray-800">{user.name}</td>
-            <td className="border px-6 py-3 text-gray-800">{user.role}</td>
-            <td className="border px-6 py-3 text-gray-800">{user.email}</td>
-            <td className="border px-6 py-3 text-center">
-              <button
-                onClick={() => handleEdit(user)}
-                className="bg-yellow-500 text-white py-2 px-4 rounded-full mr-2 hover:bg-yellow-600 transition duration-300 ease-in-out transform hover:scale-105"
-              >
-                Modifier
-              </button>
-              <button
-                onClick={() => handleDelete(user.user_id)}
-                className="bg-red-500 text-white py-2 px-4 rounded-full hover:bg-red-600 transition duration-300 ease-in-out transform hover:scale-105"
-              >
-                Supprimer
-              </button>
-            </td>
-          </tr>
-        ))
-      )}
-    </tbody>
-  </table>
+      ))
+    )}
+  </tbody>
+</table>
+
 </div>
 
   </div>

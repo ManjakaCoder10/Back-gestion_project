@@ -233,45 +233,56 @@ export default function GestionProjet() {
       </div>
     ))}
 
-    <button
-      type="button"
-      onClick={addTask}
-      className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-all mb-6 animate-bounce-slow"
-    >
-      Ajouter une tâche
-    </button>
+ {/* Bouton Ajouter une tâche */}
+<button
+  type="button"
+  onClick={addTask}
+  className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out mb-6 animate-bounce-slow"
+  style={{ animation: 'bounce 1s infinite ease-in-out' }}
+>
+  Ajouter une tâche
+</button>
 
-    {/* Bouton de soumission */}
-    <button type="submit" className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-all animate-pulse">
-      {id ? 'Mettre à jour le projet' : 'Ajouter le projet'}
-    </button>
+{/* Bouton de soumission */}
+<button
+  type="submit"
+  className="w-full bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 ease-in-out animate-pulse"
+  style={{ animation: 'pulse 2s infinite' }}
+>
+  {id ? 'Mettre à jour le projet' : 'Ajouter le projet'}
+</button>
+
   </form>
 
   {/* Affichage des projets */}
   <div className="mt-10">
-    <h2 className="text-3xl font-semibold mb-6 text-gray-700 animate-fade-in">Liste des projets</h2>
-    <ul className="bg-white p-6 rounded-lg shadow-md space-y-4">
-      {projects.map((project) => (
-        <li key={project.project_id} className="border-b last:border-none py-4 flex justify-between items-center animate-fade-in">
-          <span className="text-lg font-medium">{project.project_name}</span>
-          <div>
-            <button
-              onClick={() => handleEdit(project)}
-              className="text-blue-500 hover:text-blue-700 mr-4 transition-all"
-            >
-              Modifier
-            </button>
-            <button
-              onClick={() => handleDelete(project.project_id)}
-              className="text-red-500 hover:text-red-700 transition-all"
-            >
-              Supprimer
-            </button>
-          </div>
-        </li>
-      ))}
-    </ul>
-  </div>
+  <h2 className="text-3xl font-semibold mb-6 text-gray-800 animate-fade-in">Liste des projets</h2>
+  <ul className="bg-white p-6 rounded-lg shadow-lg space-y-4">
+    {projects.map((project) => (
+      <li 
+        key={project.project_id} 
+        className="border-b last:border-none py-4 flex justify-between items-center bg-gray-50 hover:bg-gray-100 rounded-md transition-colors duration-200 animate-fade-in"
+      >
+        <span className="text-lg font-medium text-gray-800">{project.project_name}</span>
+        <div>
+          <button
+            onClick={() => handleEdit(project)}
+            className="text-blue-600 hover:text-blue-800 mr-4 transition-colors duration-200"
+          >
+            Modifier
+          </button>
+          <button
+            onClick={() => handleDelete(project.project_id)}
+            className="text-red-600 hover:text-red-800 transition-colors duration-200"
+          >
+            Supprimer
+          </button>
+        </div>
+      </li>
+    ))}
+  </ul>
+</div>
+
 
   {/* Message de retour */}
   {message && (
